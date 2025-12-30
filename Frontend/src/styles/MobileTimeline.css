@@ -25,7 +25,7 @@
   position: relative;
   margin-bottom: 24px;
   padding-left: 60px;
-  opacity: 0;
+  opacity: 1;
   animation: slideInMobile 0.4s ease-out forwards;
   animation-delay: var(--delay, 0s);
   will-change: transform, opacity;
