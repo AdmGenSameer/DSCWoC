@@ -1,3 +1,4 @@
+import { Github, Linkedin, Mail, Instagram } from 'lucide-react';
 const Footer = () => {
   return (
     <footer className="relative py-12 px-6 border-t border-cosmic-purple/10">
@@ -6,12 +7,20 @@ const Footer = () => {
           {/* Brand */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cosmic-purple to-nebula-pink glow-effect"></div>
+              <img src="/clubLogo.png" alt="DSC" className="w-8 h-8" />
               <span className="text-xl font-bold text-white">DSC Winter of Code</span>
             </div>
             <p className="text-gray-400 text-sm">
               Empowering students through open-source contributions and mentorship.
             </p>
+            <div className="mt-4">
+              <div className="text-cosmic-purple font-semibold text-sm">Data Science Club, VIT Bhopal — building makers & contributors.</div>
+              <div className="mt-2 flex items-center gap-3 text-gray-400 text-xs">
+                <span>📧 dsc.vitb@vitbhopal.ac.in</span>
+                <span>•</span>
+                <span>📍 VIT Bhopal</span>
+              </div>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -35,14 +44,22 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-4">Connect With Us</h3>
             <div className="flex gap-4">
-              {['GitHub', 'Twitter', 'Discord', 'LinkedIn'].map((platform) => (
+              {[
+                { name: 'GitHub', icon: Github, url: 'https://github.com/cdsvitbhopal', color: 'hover:text-white' },
+                { name: 'LinkedIn', icon: Linkedin, url: 'https://www.linkedin.com/in/data-science-club-vit-bhopal-5b9b02232/', color: 'hover:text-blue-500' },
+                { name: 'Email', icon: Mail, url: 'mailto:dsc.vitb@vitbhopal.ac.in', color: 'hover:text-pink-400' },
+                { name: 'Instagram', icon: Instagram, url: 'https://www.instagram.com/dsc_vitb/', color: 'hover:text-pink-500' }
+              ].map(({ name, icon: Icon, url, color }) => (
                 <a
-                  key={platform}
-                  href="#"
-                  className="w-10 h-10 rounded-full glass-effect flex items-center justify-center text-cosmic-purple hover:bg-cosmic-purple hover:text-white transition-all duration-300"
-                  aria-label={platform}
+                  key={name}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`w-10 h-10 rounded-full glass-effect flex items-center justify-center text-cosmic-purple ${color} transition-all duration-300 hover:glow-effect`}
+                  aria-label={name}
+                  title={name}
                 >
-                  {platform[0]}
+                  <Icon size={20} />
                 </a>
               ))}
             </div>
