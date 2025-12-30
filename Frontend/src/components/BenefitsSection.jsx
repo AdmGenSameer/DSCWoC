@@ -182,7 +182,7 @@ const BenefitsSection = () => {
   }, [isMobile]);
 
   return (
-    <section id="rewards" className="relative mt-4 sm:mt-6 py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full z-20">
+    <section id="rewards" className="relative py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible', zIndex: 'auto' }}>
       {/* Animated background stars */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(30)].map((_, i) => (
@@ -215,8 +215,8 @@ const BenefitsSection = () => {
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className={`relative ${isMobile ? 'animate-fadeIn' : ''}`}
-              style={{ transformStyle: 'preserve-3d' }}
+              className={`relative ${isMobile ? 'animate-slideUp' : ''}`}
+              style={isMobile ? { '--animation-delay': `${index * 0.1}s`, transformStyle: 'preserve-3d' } : { transformStyle: 'preserve-3d' }}
             >
               {/* Orbit ring - hide on mobile */}
               {!isMobile && (
