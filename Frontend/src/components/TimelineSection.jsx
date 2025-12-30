@@ -1,8 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { useGsap } from '../hooks/useGsap';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const TimelineSection = () => {
-  const { gsap, isLoaded } = useGsap();
   const timelineRef = useRef(null);
   const rocketRef = useRef(null);
   const pathRef = useRef(null);
@@ -85,8 +87,6 @@ const TimelineSection = () => {
   ];
 
   useEffect(() => {
-    if (!gsap || !isLoaded) return; // Wait for GSAP to load
-    
     const timeline = timelineRef.current;
     const rocket = rocketRef.current;
     const path = pathRef.current;
@@ -281,7 +281,7 @@ const TimelineSection = () => {
         gsap.ScrollTrigger.getAll().forEach(trigger => trigger.kill());
       }
     };
-  }, [gsap, isLoaded]);
+  }, []);
 
   const renderGalaxy = () => (
     <div className="absolute -inset-14 pointer-events-none" style={{ zIndex: 0 }}>
