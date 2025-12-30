@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useIsMobile } from '../hooks/useIsMobile';
+import '../styles/MobileBenefits.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -181,6 +182,70 @@ const BenefitsSection = () => {
     };
   }, [isMobile]);
 
+  // Mobile Optimized Version
+  if (isMobile) {
+    return (
+      <section id="rewards" className="relative py-12 px-3 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible' }}>
+        {/* Animated background stars */}
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-0.5 h-0.5 bg-white rounded-full animate-pulse"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                opacity: Math.random() * 0.5 + 0.2,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="relative z-10 max-w-2xl mx-auto">
+          {/* Title */}
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">
+              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-transparent bg-clip-text">
+                CREW BENEFITS
+              </span>
+            </h2>
+            <p className="text-xs text-gray-400">
+              Unlock cosmic rewards from across the galaxy
+            </p>
+          </div>
+
+          {/* Mobile Benefits Grid */}
+          <div className="mobile-benefits-container">
+            <div className="mobile-benefits-grid">
+              {benefits.map((benefit, index) => (
+                <div
+                  key={index}
+                  className="mobile-benefits-card animate-slideUp"
+                  style={{ animationDelay: `${index * 0.08}s` }}
+                >
+                  <div className="mobile-benefits-icon">{benefit.icon}</div>
+                  <h3 className="mobile-benefits-title">{benefit.title}</h3>
+                  <p className="mobile-benefits-description">{benefit.description}</p>
+                  <div
+                    className="mobile-benefits-accent"
+                    style={{ '--color': benefit.orbitColor }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="text-center mt-8">
+            <p className="text-gray-400 text-xs">Ready to claim rewards? 🌠</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop Version with GSAP
   return (
     <section id="rewards" className="relative py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible', zIndex: 'auto' }}>
       {/* Animated background stars */}
@@ -201,25 +266,24 @@ const BenefitsSection = () => {
 
       <div className="max-w-7xl mx-auto relative z-10" style={{ position: 'relative' }}>
         <div ref={titleRef} className="text-center mb-12 md:mb-20" style={{ opacity: 1, position: 'relative', zIndex: 10 }}>
-          <h2 className={`font-bold text-white mb-4 tracking-wider ${isMobile ? 'text-4xl' : 'text-7xl'}`}>
+          <h2 className="text-7xl font-bold text-white mb-4 tracking-wider">
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-transparent bg-clip-text">
               CREW BENEFITS
             </span>
           </h2>
-          <p className={`text-gray-400 max-w-2xl mx-auto ${isMobile ? 'text-sm' : 'text-xl'}`}>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Embark on this cosmic journey and unlock rewards from across the galaxy
           </p>
         </div>
 
-        <div ref={sectionRef} className={`grid gap-6 md:gap-8 lg:gap-12 perspective-1000 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
+        <div ref={sectionRef} className="grid gap-6 md:gap-8 lg:gap-12 perspective-1000 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {benefits.map((benefit, index) => (
             <div
               key={index}
               className="relative"
-              style={isMobile ? { animationDelay: `${index * 0.1}s`, transformStyle: 'preserve-3d' } : { transformStyle: 'preserve-3d' }}
+              style={{ transformStyle: 'preserve-3d' }}
             >
-              {/* Orbit ring - hide on mobile */}
-              {!isMobile && (
+              {/* Orbit ring */}
               <div
                 ref={el => orbitRefs.current[index] = el}
                 className="absolute inset-0 rounded-full border-2 border-dashed opacity-60 -z-10"
@@ -228,12 +292,11 @@ const BenefitsSection = () => {
                   transform: 'scale(1.1)',
                 }}
               />
-              )}
 
               {/* Card */}
               <div
                 ref={el => cardRefs.current[index] = el}
-                className={`relative glass-effect rounded-3xl p-6 md:p-8 h-full group cursor-pointer overflow-hidden ${isMobile ? 'animate-slideUp' : ''}`}
+                className="relative glass-effect rounded-3xl p-6 md:p-8 h-full group cursor-pointer overflow-hidden"
                 style={{
                   background: 'rgba(17, 24, 39, 0.7)',
                   backdropFilter: 'blur(12px)',
@@ -247,20 +310,20 @@ const BenefitsSection = () => {
                 />
 
                 {/* Icon with glow effect */}
-                <div className={`relative mb-6 ${isMobile ? 'mb-4' : ''}`}>
-                  <div className={`absolute inset-0 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500 ${isMobile ? 'hidden' : ''}`}>
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500">
                     <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${benefit.gradient}`} />
                   </div>
-                  <div className={`relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 ${isMobile ? 'text-5xl' : 'text-7xl'}`}>
+                  <div className="relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 text-7xl">
                     {benefit.icon}
                   </div>
                 </div>
 
                 {/* Content */}
-                <h3 className={`font-bold mb-3 md:mb-4 bg-gradient-to-r ${benefit.gradient} text-transparent bg-clip-text ${isMobile ? 'text-lg' : 'text-2xl'}`}>
+                <h3 className={`font-bold mb-3 md:mb-4 bg-gradient-to-r ${benefit.gradient} text-transparent bg-clip-text text-2xl`}>
                   {benefit.title}
                 </h3>
-                <p className={`leading-relaxed text-gray-300 ${isMobile ? 'text-sm' : ''}`}>
+                <p className="leading-relaxed text-gray-300">
                   {benefit.description}
                 </p>
 
