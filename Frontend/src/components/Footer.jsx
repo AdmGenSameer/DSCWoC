@@ -1,4 +1,4 @@
-import { Github, Twitter, MessageCircle, Linkedin, Mail, Instagram } from 'lucide-react';
+import { Github, Linkedin, Mail, Instagram } from 'lucide-react';
 const Footer = () => {
   return (
     <footer className="relative py-12 px-6 border-t border-cosmic-purple/10">
