@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AboutSection from './components/AboutSection';
 import BenefitsSection from './components/BenefitsSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
+import SpaceLoader from './components/SpaceLoader';
 
 // Lazy load heavy animation components
 const Starfield = lazy(() => import('./components/Starfield'));
@@ -24,7 +25,7 @@ const AnimationFallback = () => (
 );
 
 // Home component
-const Home = () => (
+const Home = ({ gsapReady }) => (
   <div className="relative">
     {/* Starfield Background - Lazy loaded */}
     <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
@@ -39,7 +40,7 @@ const Home = () => (
       </Suspense>
       <AboutSection />
       <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-        <TimelineSection />
+        {gsapReady && <TimelineSection />}
       </Suspense>
       <BenefitsSection />
       <CTASection />
@@ -49,19 +50,31 @@ const Home = () => (
 );
 
 function App() {
+  const [gsapLoaded, setGsapLoaded] = useState(false);
+
+  useEffect(() => {
+    // Simulate GSAP loading with a small delay to show loader
+    const timer = setTimeout(() => setGsapLoaded(true), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
+
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<Dashboard />} />
-        <Route path="/mentor/dashboard" element={<Dashboard />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/faq" element={<FAQ />} />
-      </Routes>
-    </Router>
+    <>
+      <SpaceLoader isLoading={!gsapLoaded} />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home gsapReady={gsapLoaded} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<Dashboard />} />
+          <Route path="/mentor/dashboard" element={<Dashboard />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/faq" element={<FAQ />} />
+        </Routes>
+      </Router>
+    </>
   );
 }
 

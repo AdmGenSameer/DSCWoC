@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import gsap from 'gsap';
+import { useGsap } from '../hooks/useGsap';
 
 const Starships = () => {
+  const { gsap, isLoaded } = useGsap();
   const spaceshipRefs = useRef([]);
   const [spaceships] = useState(() => 
     Array.from({ length: 8 }, (_, i) => ({
@@ -17,6 +18,8 @@ const Starships = () => {
   );
 
   useEffect(() => {
+    if (!gsap || !isLoaded) return; // Wait for GSAP to load
+    
     // Animate roaming starships across entire page
     spaceshipRefs.current.forEach((spaceship, index) => {
       if (!spaceship) return;
@@ -61,7 +64,7 @@ const Starships = () => {
     return () => {
       gsap.killTweensOf(spaceshipRefs.current);
     };
-  }, [spaceships]);
+  }, [spaceships, gsap, isLoaded]);
 
   const StarshipType1 = ({ index }) => (
     <svg viewBox="0 0 120 80" fill="none" className="w-full h-full">
