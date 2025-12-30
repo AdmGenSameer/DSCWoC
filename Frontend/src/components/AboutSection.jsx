@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,6 +10,7 @@ const AboutSection = () => {
   const computerRef = useRef(null);
   const [typedText, setTypedText] = useState('');
   const [currentLine, setCurrentLine] = useState(0);
+  const isMobile = useIsMobile();
 
   const terminalLines = [
     '> INITIALIZING MISSION PROTOCOL...',
@@ -39,9 +41,35 @@ const AboutSection = () => {
     '> AWAITING CREW REGISTRATION...',
   ];
 
+  // Typing effect function (desktop only)
+  const startTyping = () => {
+    let lineIndex = 0;
+    let charIndex = 0;
+    let fullText = '';
+
+    const typeInterval = setInterval(() => {
+      if (lineIndex < terminalLines.length) {
+        if (charIndex < terminalLines[lineIndex].length) {
+          fullText += terminalLines[lineIndex][charIndex];
+          setTypedText(fullText);
+          charIndex++;
+        } else {
+          fullText += '\n';
+          setTypedText(fullText);
+          lineIndex++;
+          charIndex = 0;
+          setCurrentLine(lineIndex);
+        }
+      } else {
+        clearInterval(typeInterval);
+      }
+    }, 30);
+  };
+
   useEffect(() => {
     const terminal = terminalRef.current;
     const computer = computerRef.current;
+    if (isMobile) return undefined;
     
     if (computer) {
       // 3D computer animation
@@ -98,35 +126,74 @@ const AboutSection = () => {
       );
     }
 
-    // Typing effect function
-    const startTyping = () => {
-      let lineIndex = 0;
-      let charIndex = 0;
-      let fullText = '';
-
-      const typeInterval = setInterval(() => {
-        if (lineIndex < terminalLines.length) {
-          if (charIndex < terminalLines[lineIndex].length) {
-            fullText += terminalLines[lineIndex][charIndex];
-            setTypedText(fullText);
-            charIndex++;
-          } else {
-            fullText += '\n';
-            setTypedText(fullText);
-            lineIndex++;
-            charIndex = 0;
-            setCurrentLine(lineIndex);
-          }
-        } else {
-          clearInterval(typeInterval);
-        }
-      }, 30);
-    };
-
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMobile]);
+
+  // Mobile-only lightweight flight computer (Tailwind CSS only)
+  if (isMobile) {
+    const insights = [
+      { label: 'Mission Status', value: 'Active', accent: 'from-cosmic-purple to-nebula-pink' },
+      { label: 'Objectives', value: '4 Weeks · 10 Phases', accent: 'from-stellar-cyan to-galaxy-violet' },
+      { label: 'Comms Link', value: 'Uplink Stable', accent: 'from-amber-400 to-orange-500' },
+      { label: 'Next Milestone', value: 'Orbit Phase I', accent: 'from-emerald-400 to-teal-500' },
+    ];
+
+    return (
+      <section id="about" className="relative py-14 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-white mb-2">Mission Briefing</h2>
+            <p className="text-sm text-gray-400">Flight computer snapshot · Mobile</p>
+          </div>
+
+          <div className="glass-effect rounded-xl border border-white/10 p-4 shadow-lg shadow-cosmic-purple/10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2 text-xs text-gray-300">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                FLIGHT_COMPUTER_MOBILE
+              </div>
+              <span className="text-[11px] text-gray-400">LIVE</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {insights.map((item) => (
+                <div
+                  key={item.label}
+                  className="rounded-lg border border-white/10 p-3 bg-slate-900/60"
+                >
+                  <div className="text-[11px] uppercase tracking-wide text-gray-400">{item.label}</div>
+                  <div className={`mt-1 text-white font-semibold text-lg bg-clip-text text-transparent bg-gradient-to-r ${item.accent}`}>
+                    {item.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 text-xs text-gray-400 grid grid-cols-2 gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                Power: 98%
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+                Uplink: Active
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                GPS: Locked
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-pink-400"></span>
+                Crew: Synced
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="about" className="relative py-32 px-6" style={{ perspective: '1500px' }}>
