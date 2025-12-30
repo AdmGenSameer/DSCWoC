@@ -40,7 +40,7 @@ const Home = ({ gsapReady }) => (
       </Suspense>
       <AboutSection />
       <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-        {gsapReady && <TimelineSection />}
+        <TimelineSection />
       </Suspense>
       <BenefitsSection />
       <CTASection />

@@ -30,10 +30,13 @@ const SpaceLoader = ({ isLoading = true }) => {
     };
   }, [isLoading]);
 
-  if (!isLoading) return null;
-
   return (
-    <div className="space-loader-container">
+    <div 
+      className={`space-loader-container ${!isLoading ? 'opacity-0 pointer-events-none' : ''}`}
+      style={{
+        transition: 'opacity 0.5s ease-out',
+      }}
+    >
       {/* Animated orbiting planets */}
       <div className="planet-orbit">
         <div className="planet planet-1"></div>

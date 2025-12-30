@@ -13,6 +13,10 @@
   overflow: hidden;
 }
 
+.space-loader-container.opacity-0 {
+  pointer-events: none;
+}
+
 /* Stars background */
 .space-loader-star {
   position: absolute;
