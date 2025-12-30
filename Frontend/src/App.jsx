@@ -1,13 +1,15 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Starfield from './components/Starfield';
-import Starships from './components/Starships';
+import { lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
-import TimelineSection from './components/TimelineSection';
 import BenefitsSection from './components/BenefitsSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
+
+// Lazy load heavy animation components
+const Starfield = lazy(() => import('./components/Starfield'));
+const HeroSection = lazy(() => import('./components/HeroSection'));
+const TimelineSection = lazy(() => import('./components/TimelineSection'));
 
 // Pages
 import Login from './pages/Login';
@@ -16,21 +18,29 @@ import Dashboard from './pages/Dashboard';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 
+// Loading fallback component
+const AnimationFallback = () => (
+  <div className="w-full h-screen bg-gradient-to-b from-slate-900 to-slate-950 animate-pulse" />
+);
+
 // Home component
 const Home = () => (
   <div className="relative">
-    {/* Starfield Background */}
-    <Starfield />
-
-    {/* Roaming Starships */}
-    {/* <Starships /> */}
+    {/* Starfield Background - Lazy loaded */}
+    <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
+      <Starfield />
+    </Suspense>
 
     {/* Content */}
     <div className="relative z-10">
       <Navbar />
-      <HeroSection />
+      <Suspense fallback={<AnimationFallback />}>
+        <HeroSection />
+      </Suspense>
       <AboutSection />
-      <TimelineSection />
+      <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
+        <TimelineSection />
+      </Suspense>
       <BenefitsSection />
       <CTASection />
       <Footer />
