@@ -1,69 +1,46 @@
-import { useEffect, useRef } from 'react';
-import '../styles/SpaceLoader.css';
-
 const SpaceLoader = ({ isLoading = true }) => {
-  const starsRef = useRef([]);
-
-  useEffect(() => {
-    if (!isLoading) return;
-
-    // Create random stars
-    const container = document.querySelector('.space-loader-container');
-    if (!container) return;
-
-    for (let i = 0; i < 50; i++) {
-      const star = document.createElement('div');
-      star.className = 'space-loader-star';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.width = Math.random() * 3 + 1 + 'px';
-      star.style.height = star.style.width;
-      star.style.animation = `twinkle ${Math.random() * 3 + 1}s infinite`;
-      star.style.animationDelay = Math.random() * 2 + 's';
-      container.appendChild(star);
-      starsRef.current.push(star);
-    }
-
-    return () => {
-      starsRef.current.forEach(star => star.remove());
-      starsRef.current = [];
-    };
-  }, [isLoading]);
+  if (!isLoading) return null;
 
   return (
-    <div 
-      className={`space-loader-container ${!isLoading ? 'opacity-0 pointer-events-none' : ''}`}
-      style={{
-        transition: 'opacity 0.5s ease-out',
-      }}
-    >
-      {/* Animated orbiting planets */}
-      <div className="planet-orbit">
-        <div className="planet planet-1"></div>
-        <div className="planet planet-2"></div>
-        <div className="planet planet-3"></div>
-      </div>
-
-      {/* Central loading sphere */}
-      <div className="center-sphere">
-        <div className="sphere-pulse"></div>
-        <div className="sphere-ring ring-1"></div>
-        <div className="sphere-ring ring-2"></div>
-      </div>
-
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      background: 'linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 9999,
+    }}>
+      {/* Simple spinner */}
+      <div style={{
+        width: '60px',
+        height: '60px',
+        border: '4px solid rgba(100, 200, 255, 0.2)',
+        borderTop: '4px solid #64c8ff',
+        borderRadius: '50%',
+        animation: 'spin 1s linear infinite',
+      }} />
+      
       {/* Loading text */}
-      <div className="loader-text">
-        <p>Launching Mission...</p>
-        <div className="loader-dots">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-      </div>
+      <p style={{
+        color: '#64c8ff',
+        fontSize: '18px',
+        marginTop: '20px',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}>
+        Loading...
+      </p>
 
-      {/* Shooting stars */}
-      <div className="shooting-star shooting-star-1"></div>
-      <div className="shooting-star shooting-star-2"></div>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 };

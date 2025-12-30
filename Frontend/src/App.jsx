@@ -24,23 +24,23 @@ const AnimationFallback = () => (
   <div className="w-full h-screen bg-gradient-to-b from-slate-900 to-slate-950 animate-pulse" />
 );
 
-// Home component - receives wrapper components
-const Home = ({ StarfieldWrapper, HeroSectionWrapper, TimelineSectionWrapper }) => (
+// Home component
+const Home = () => (
   <div className="relative">
     {/* Starfield Background - Lazy loaded */}
     <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
-      <StarfieldWrapper />
+      <Starfield />
     </Suspense>
 
     {/* Content */}
     <div className="relative z-10">
       <Navbar />
       <Suspense fallback={<AnimationFallback />}>
-        <HeroSectionWrapper />
+        <HeroSection />
       </Suspense>
       <AboutSection />
       <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-        <TimelineSectionWrapper />
+        <TimelineSection />
       </Suspense>
       <BenefitsSection />
       <CTASection />
@@ -50,60 +50,20 @@ const Home = ({ StarfieldWrapper, HeroSectionWrapper, TimelineSectionWrapper }) 
 );
 
 function App() {
-  const [loadedComponents, setLoadedComponents] = useState({
-    starfield: false,
-    hero: false,
-    timeline: false,
-  });
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mark components as loaded when they mount
-  const markLoaded = (component) => {
-    setLoadedComponents(prev => ({
-      ...prev,
-      [component]: true,
-    }));
-  };
-
-  // All loaded when all components are true
-  const allLoaded = Object.values(loadedComponents).every(loaded => loaded);
-
-  // Wrapper components that report when they're mounted
-  const StarfieldWrapper = () => {
-    useEffect(() => {
-      markLoaded('starfield');
-    }, []);
-    return <Starfield />;
-  };
-
-  const HeroSectionWrapper = () => {
-    useEffect(() => {
-      markLoaded('hero');
-    }, []);
-    return <HeroSection />;
-  };
-
-  const TimelineSectionWrapper = () => {
-    useEffect(() => {
-      markLoaded('timeline');
-    }, []);
-    return <TimelineSection />;
-  };
+  useEffect(() => {
+    // Hide loader after a short delay to ensure components mount
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <>
-      <SpaceLoader isLoading={!allLoaded} />
+      {isLoading && <SpaceLoader isLoading={true} />}
       <Router>
         <Routes>
-          <Route 
-            path="/" 
-            element={
-              <Home 
-                StarfieldWrapper={StarfieldWrapper}
-                HeroSectionWrapper={HeroSectionWrapper}
-                TimelineSectionWrapper={TimelineSectionWrapper}
-              />
-            } 
-          />
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/dashboard" element={<Dashboard />} />
