@@ -24,23 +24,23 @@ const AnimationFallback = () => (
   <div className="w-full h-screen bg-gradient-to-b from-slate-900 to-slate-950 animate-pulse" />
 );
 
-// Home component
-const Home = ({ gsapReady }) => (
+// Home component - receives wrapper components
+const Home = ({ StarfieldWrapper, HeroSectionWrapper, TimelineSectionWrapper }) => (
   <div className="relative">
     {/* Starfield Background - Lazy loaded */}
     <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
-      <Starfield />
+      <StarfieldWrapper />
     </Suspense>
 
     {/* Content */}
     <div className="relative z-10">
       <Navbar />
       <Suspense fallback={<AnimationFallback />}>
-        <HeroSection />
+        <HeroSectionWrapper />
       </Suspense>
       <AboutSection />
       <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-        <TimelineSection />
+        <TimelineSectionWrapper />
       </Suspense>
       <BenefitsSection />
       <CTASection />
@@ -50,21 +50,60 @@ const Home = ({ gsapReady }) => (
 );
 
 function App() {
-  const [gsapLoaded, setGsapLoaded] = useState(false);
+  const [loadedComponents, setLoadedComponents] = useState({
+    starfield: false,
+    hero: false,
+    timeline: false,
+  });
 
-  useEffect(() => {
-    // Simulate GSAP loading with a small delay to show loader
-    const timer = setTimeout(() => setGsapLoaded(true), 800);
-    return () => clearTimeout(timer);
-  }, []);
+  // Mark components as loaded when they mount
+  const markLoaded = (component) => {
+    setLoadedComponents(prev => ({
+      ...prev,
+      [component]: true,
+    }));
+  };
 
+  // All loaded when all components are true
+  const allLoaded = Object.values(loadedComponents).every(loaded => loaded);
+
+  // Wrapper components that report when they're mounted
+  const StarfieldWrapper = () => {
+    useEffect(() => {
+      markLoaded('starfield');
+    }, []);
+    return <Starfield />;
+  };
+
+  const HeroSectionWrapper = () => {
+    useEffect(() => {
+      markLoaded('hero');
+    }, []);
+    return <HeroSection />;
+  };
+
+  const TimelineSectionWrapper = () => {
+    useEffect(() => {
+      markLoaded('timeline');
+    }, []);
+    return <TimelineSection />;
+  };
 
   return (
     <>
-      <SpaceLoader isLoading={!gsapLoaded} />
+      <SpaceLoader isLoading={!allLoaded} />
       <Router>
         <Routes>
-          <Route path="/" element={<Home gsapReady={gsapLoaded} />} />
+          <Route 
+            path="/" 
+            element={
+              <Home 
+                StarfieldWrapper={StarfieldWrapper}
+                HeroSectionWrapper={HeroSectionWrapper}
+                TimelineSectionWrapper={TimelineSectionWrapper}
+              />
+            } 
+          />
           <Route path="/login" element={<Login />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/dashboard" element={<Dashboard />} />
