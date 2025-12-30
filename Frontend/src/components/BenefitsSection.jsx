@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const BenefitsSection = () => {
+  const isMobile = useIsMobile();
   const cardRefs = useRef([]);
   const titleRef = useRef(null);
   const sectionRef = useRef(null);
@@ -56,6 +58,8 @@ const BenefitsSection = () => {
   ];
 
   useEffect(() => {
+    if (isMobile) return; // Skip GSAP animations on mobile
+
     // Animate title
     if (titleRef.current) {
       gsap.fromTo(
@@ -175,7 +179,7 @@ const BenefitsSection = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <section id="rewards" className="relative py-32 px-6 overflow-hidden">
@@ -196,25 +200,26 @@ const BenefitsSection = () => {
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div ref={titleRef} className="text-center mb-20">
-          <h2 className="text-7xl font-bold text-white mb-4 tracking-wider">
+        <div ref={titleRef} className="text-center mb-12 md:mb-20">
+          <h2 className={`font-bold text-white mb-4 tracking-wider ${isMobile ? 'text-4xl' : 'text-7xl'}`}>
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-transparent bg-clip-text">
               CREW BENEFITS
             </span>
           </h2>
-          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
+          <p className={`text-gray-400 max-w-2xl mx-auto ${isMobile ? 'text-sm' : 'text-xl'}`}>
             Embark on this cosmic journey and unlock rewards from across the galaxy
           </p>
         </div>
 
-        <div ref={sectionRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 perspective-1000">
+        <div ref={sectionRef} className={`grid gap-6 md:gap-8 lg:gap-12 perspective-1000 ${isMobile ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'}`}>
           {benefits.map((benefit, index) => (
             <div
               key={index}
-              className="relative"
+              className={`relative ${isMobile ? 'animate-fadeIn' : ''}`}
               style={{ transformStyle: 'preserve-3d' }}
             >
-              {/* Orbit ring */}
+              {/* Orbit ring - hide on mobile */}
+              {!isMobile && (
               <div
                 ref={el => orbitRefs.current[index] = el}
                 className="absolute inset-0 rounded-full border-2 border-dashed opacity-60 -z-10"
@@ -223,11 +228,12 @@ const BenefitsSection = () => {
                   transform: 'scale(1.1)',
                 }}
               />
+              )}
 
               {/* Card */}
               <div
                 ref={el => cardRefs.current[index] = el}
-                className="relative glass-effect rounded-3xl p-8 h-full group cursor-pointer overflow-hidden"
+                className={`relative glass-effect rounded-3xl p-6 md:p-8 h-full group cursor-pointer overflow-hidden ${isMobile ? 'animate-slideUp' : ''}`}
                 style={{
                   background: 'rgba(17, 24, 39, 0.7)',
                   backdropFilter: 'blur(12px)',
@@ -240,20 +246,20 @@ const BenefitsSection = () => {
                 />
 
                 {/* Icon with glow effect */}
-                <div className="relative mb-6">
-                  <div className="absolute inset-0 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500">
+                <div className={`relative mb-6 ${isMobile ? 'mb-4' : ''}`}>
+                  <div className={`absolute inset-0 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500 ${isMobile ? 'hidden' : ''}`}>
                     <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${benefit.gradient}`} />
                   </div>
-                  <div className="relative text-7xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                  <div className={`relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 ${isMobile ? 'text-5xl' : 'text-7xl'}`}>
                     {benefit.icon}
                   </div>
                 </div>
 
                 {/* Content */}
-                <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${benefit.gradient} text-transparent bg-clip-text`}>
+                <h3 className={`font-bold mb-3 md:mb-4 bg-gradient-to-r ${benefit.gradient} text-transparent bg-clip-text ${isMobile ? 'text-lg' : 'text-2xl'}`}>
                   {benefit.title}
                 </h3>
-                <p className="text-gray-300 leading-relaxed">
+                <p className={`leading-relaxed text-gray-300 ${isMobile ? 'text-sm' : ''}`}>
                   {benefit.description}
                 </p>
 
