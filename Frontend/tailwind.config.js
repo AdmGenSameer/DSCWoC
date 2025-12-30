@@ -7,10 +7,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        'space-black': '#000000',
+        'space-black': '#0B0F1A',
+        'midnight-blue': '#0E1629',
+        'stellar-cyan': '#4CC9F0',
+        'nebula-blue': '#72E0FF',
+        'cosmic-purple': '#7A5CFF',
         'deep-space': '#0a0118',
         'midnight-void': '#0d0221',
-        'cosmic-purple': '#8b5cf6',
         'nebula-pink': '#ec4899',
         'galaxy-violet': '#a855f7',
         'star-blue': '#3b82f6',

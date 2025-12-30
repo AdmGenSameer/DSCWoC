@@ -12,6 +12,8 @@ import userRoutes from './routes/user.routes.js';
 import projectRoutes from './routes/project.routes.js';
 import pullRequestRoutes from './routes/pullRequest.routes.js';
 import badgeRoutes from './routes/badge.routes.js';
+import authRoutes from './routes/auth.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 
 const app = express();
 
@@ -19,8 +21,26 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  process.env.CORS_ORIGIN
+].filter(Boolean);
+
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow all origins in development
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200,
 };
@@ -63,10 +83,12 @@ app.get('/health', (req, res) => {
 
 // API routes
 const API_VERSION = process.env.API_VERSION || 'v1';
+app.use(`/api/${API_VERSION}/auth`, authRoutes);
 app.use(`/api/${API_VERSION}/users`, userRoutes);
 app.use(`/api/${API_VERSION}/projects`, projectRoutes);
 app.use(`/api/${API_VERSION}/pull-requests`, pullRequestRoutes);
 app.use(`/api/${API_VERSION}/badges`, badgeRoutes);
+app.use(`/api/${API_VERSION}/contact`, contactRoutes);
 
 // 404 handler
 app.use(notFound);

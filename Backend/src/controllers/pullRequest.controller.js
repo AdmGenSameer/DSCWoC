@@ -10,7 +10,7 @@ import { HTTP_STATUS } from '../config/constants.js';
 export const getPullRequests = asyncHandler(async (req, res) => {
   // TODO: Implement pagination
   // TODO: Implement filtering (status, user, project)
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Get all pull requests - TODO: Implement this endpoint',
@@ -25,7 +25,7 @@ export const getPullRequests = asyncHandler(async (req, res) => {
 export const getPullRequest = asyncHandler(async (req, res) => {
   // TODO: Fetch pull request by ID
   // TODO: Populate user and project
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Get single pull request - TODO: Implement this endpoint',
@@ -39,7 +39,7 @@ export const getPullRequest = asyncHandler(async (req, res) => {
  */
 export const getUserPullRequests = asyncHandler(async (req, res) => {
   // TODO: Fetch all PRs for a specific user
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Get user pull requests - TODO: Implement this endpoint',
@@ -53,7 +53,7 @@ export const getUserPullRequests = asyncHandler(async (req, res) => {
  */
 export const getProjectPullRequests = asyncHandler(async (req, res) => {
   // TODO: Fetch all PRs for a specific project
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Get project pull requests - TODO: Implement this endpoint',
@@ -69,7 +69,7 @@ export const syncPullRequests = asyncHandler(async (req, res) => {
   // TODO: Fetch PRs from GitHub API
   // TODO: Update database with new/updated PRs
   // TODO: Update user stats
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Sync pull requests - TODO: Implement this endpoint',
@@ -84,7 +84,7 @@ export const syncPullRequests = asyncHandler(async (req, res) => {
 export const validatePullRequest = asyncHandler(async (req, res) => {
   // TODO: Update PR validation status
   // TODO: Update user stats accordingly
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Validate pull request - TODO: Implement this endpoint',
@@ -98,7 +98,7 @@ export const validatePullRequest = asyncHandler(async (req, res) => {
  */
 export const getRecentPullRequests = asyncHandler(async (req, res) => {
   // TODO: Fetch recent PRs sorted by date
-  
+
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Get recent pull requests - TODO: Implement this endpoint',

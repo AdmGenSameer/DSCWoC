@@ -1,19 +1,68 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
 
+    // Check if user is logged in
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = ['Home', 'About', 'Timeline', 'Tracks', 'Projects', 'Rewards'];
+  const navItems = [
+    { name: 'Home', href: '#home' },
+    { name: 'About', href: '#about' },
+    { name: 'Timeline', href: '#timeline' },
+    { name: 'Tracks', href: '#tracks' },
+    { name: 'Projects', href: '#projects' },
+    { name: 'Rewards', href: '#rewards' },
+    { name: 'FAQ', href: '/faq', isRoute: true },
+    { name: 'Contact', href: '/contact', isRoute: true }
+  ];
+
+  const handleNavClick = (item) => {
+    if (item.isRoute) {
+      navigate(item.href);
+    } else {
+      // Smooth scroll to section
+      const element = document.querySelector(item.href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+    setMobileMenuOpen(false);
+  };
+
+  const handleJoinMission = () => {
+    if (user) {
+      // Redirect based on role
+      switch (user.role) {
+        case 'Admin':
+          navigate('/admin');
+          break;
+        case 'Mentor':
+          navigate('/mentor/dashboard');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <nav
@@ -25,8 +74,11 @@ const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <img src="/clubLogo.png" alt="DSC" className="w-7 h-7 sm:w-8 sm:h-8" />
+        <div 
+          className="flex items-center space-x-2 cursor-pointer"
+          onClick={() => navigate('/')}
+        >
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-cosmic-purple to-nebula-pink glow-effect"></div>
           <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
         </div>
 
@@ -48,23 +100,45 @@ const Navbar = () => {
         </button>
 
         {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center space-x-8">
+        <div className="hidden md:flex items-center space-x-6">
           {navItems.map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
+            <button
+              key={item.name}
+              onClick={() => handleNavClick(item)}
               className="text-gray-300 hover:text-cosmic-purple transition-colors duration-200 relative group"
             >
-              {item}
+              {item.name}
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cosmic-purple to-nebula-pink group-hover:w-full transition-all duration-300"></span>
-            </a>
+            </button>
           ))}
         </div>
 
-        {/* Desktop CTA Button */}
-        <button className="hidden md:block retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink hover:from-galaxy-violet hover:to-nebula-pink text-white px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/50 hover:-translate-y-0.5">
-          JOIN MISSION
-        </button>
+        {/* Desktop User Section */}
+        <div className="hidden md:flex items-center space-x-4">
+          {user ? (
+            <div className="flex items-center space-x-3">
+              <img
+                src={user.avatar_url}
+                alt={user.fullName}
+                className="w-8 h-8 rounded-full border-2 border-stellar-cyan"
+              />
+              <span className="text-white text-sm">{user.fullName}</span>
+              <button
+                onClick={handleJoinMission}
+                className="retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink hover:from-galaxy-violet hover:to-nebula-pink text-white px-4 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/50 hover:-translate-y-0.5"
+              >
+                DASHBOARD
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={handleJoinMission}
+              className="retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink hover:from-galaxy-violet hover:to-nebula-pink text-white px-6 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/50 hover:-translate-y-0.5"
+            >
+              Sign IN
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -72,18 +146,40 @@ const Navbar = () => {
         <div className="md:hidden glass-effect border-t border-cosmic-purple/20">
           <div className="px-4 py-4 space-y-3">
             {navItems.map((item) => (
-              <a
-                key={item}
-                href={`#${item.toLowerCase()}`}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-300 hover:text-cosmic-purple transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-cosmic-purple/10"
+              <button
+                key={item.name}
+                onClick={() => handleNavClick(item)}
+                className="block w-full text-left text-gray-300 hover:text-cosmic-purple transition-colors duration-200 py-2 px-3 rounded-lg hover:bg-cosmic-purple/10"
               >
-                {item}
-              </a>
+                {item.name}
+              </button>
             ))}
-            <button className="w-full retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink text-white px-6 py-2.5 rounded-full font-semibold mt-3">
-              JOIN MISSION
-            </button>
+            
+            {user ? (
+              <div className="pt-3 border-t border-white/10">
+                <div className="flex items-center space-x-3 mb-3">
+                  <img
+                    src={user.avatar_url}
+                    alt={user.fullName}
+                    className="w-8 h-8 rounded-full border-2 border-stellar-cyan"
+                  />
+                  <span className="text-white text-sm">{user.fullName}</span>
+                </div>
+                <button
+                  onClick={handleJoinMission}
+                  className="w-full retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink text-white px-6 py-2.5 rounded-full font-semibold"
+                >
+                  DASHBOARD
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleJoinMission}
+                className="w-full retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink text-white px-6 py-2.5 rounded-full font-semibold mt-3"
+              >
+                JOIN MISSION
+              </button>
+            )}
           </div>
         </div>
       )}

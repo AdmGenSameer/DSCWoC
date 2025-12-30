@@ -10,14 +10,15 @@ const router = express.Router();
 // Public routes
 router.get('/', userController.getUsers);
 router.get('/leaderboard', userController.getLeaderboard);
-router.get('/:id', userController.getUser);
+router.get('/stats', userController.getUserStats);
 router.get('/username/:username', userController.getUserByUsername);
+router.get('/:id', userController.getUser);
 
 // Protected routes
 router.get('/me', authenticate, userController.getMe);
 router.put('/:id', authenticate, userController.updateUser);
 
 // Admin routes
-// router.delete('/:id', authenticate, authorize('admin'), userController.deleteUser);
+router.put('/:id/role', authenticate, authorize('Admin'), userController.updateUserRole);
 
 export default router;
