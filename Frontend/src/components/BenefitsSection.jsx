@@ -182,7 +182,7 @@ const BenefitsSection = () => {
   }, [isMobile]);
 
   return (
-    <section id="rewards" className="relative py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full">
+    <section id="rewards" className="relative mt-4 sm:mt-6 py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full z-20">
       {/* Animated background stars */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(30)].map((_, i) => (
@@ -199,8 +199,8 @@ const BenefitsSection = () => {
         ))}
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div ref={titleRef} className="text-center mb-12 md:mb-20">
+      <div className="max-w-7xl mx-auto relative z-10" style={{ position: 'relative' }}>
+        <div ref={titleRef} className="text-center mb-12 md:mb-20" style={{ opacity: 1, position: 'relative', zIndex: 10 }}>
           <h2 className={`font-bold text-white mb-4 tracking-wider ${isMobile ? 'text-4xl' : 'text-7xl'}`}>
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-transparent bg-clip-text">
               CREW BENEFITS
