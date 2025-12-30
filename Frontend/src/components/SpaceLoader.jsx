@@ -1,6 +1,4 @@
 const SpaceLoader = ({ isLoading = true }) => {
-  if (!isLoading) return null;
-
   return (
     <div style={{
       position: 'fixed',
@@ -14,6 +12,9 @@ const SpaceLoader = ({ isLoading = true }) => {
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 9999,
+      opacity: isLoading ? 1 : 0,
+      pointerEvents: isLoading ? 'auto' : 'none',
+      transition: 'opacity 0.5s ease-out',
     }}>
       {/* Simple spinner */}
       <div style={{
