@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useIsMobile } from '../hooks/useIsMobile';
+import MobileTimeline from './MobileTimeline';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const TimelineSection = () => {
+  const isMobile = useIsMobile();
   const timelineRef = useRef(null);
   const rocketRef = useRef(null);
   const pathRef = useRef(null);
@@ -87,6 +90,8 @@ const TimelineSection = () => {
   ];
 
   useEffect(() => {
+    if (isMobile) return; // Skip GSAP animations on mobile
+    
     const timeline = timelineRef.current;
     const rocket = rocketRef.current;
     const path = pathRef.current;
@@ -281,7 +286,7 @@ const TimelineSection = () => {
         gsap.ScrollTrigger.getAll().forEach(trigger => trigger.kill());
       }
     };
-  }, []);
+  }, [isMobile]);
 
   const renderGalaxy = () => (
     <div className="absolute -inset-14 pointer-events-none" style={{ zIndex: 0 }}>
@@ -478,7 +483,18 @@ const TimelineSection = () => {
   };
 
   return (
-    <section id="timeline" className="relative py-32 px-6 overflow-hidden" ref={timelineRef}>
+    <>
+      {isMobile ? (
+        <section id="timeline" className="relative py-16 px-4 overflow-hidden bg-gradient-to-b from-slate-950 to-slate-900">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
+              MISSION TIMELINE
+            </h2>
+            <MobileTimeline />
+          </div>
+        </section>
+      ) : (
+        <section id="timeline" className="relative py-32 px-6 overflow-hidden" ref={timelineRef}>
       <div className="max-w-6xl mx-auto">
         <h2 className="text-5xl font-bold text-white text-center mb-20">
           MISSION TIMELINE
@@ -709,6 +725,8 @@ const TimelineSection = () => {
         </div>
       </div>
     </section>
+      )}
+    </>
   );
 };
 
