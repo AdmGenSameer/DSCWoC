@@ -485,9 +485,9 @@ const TimelineSection = () => {
   return (
     <>
       {isMobile ? (
-        <section id="timeline" className="relative py-16 px-4 overflow-hidden bg-gradient-to-b from-slate-950 to-slate-900">
-          <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-12">
+        <section id="timeline" className="relative py-12 sm:py-16 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-slate-950 to-slate-900 w-full">
+          <div className="w-full max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold text-white text-center mb-10 sm:mb-12">
               MISSION TIMELINE
             </h2>
             <MobileTimeline />

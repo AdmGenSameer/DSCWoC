@@ -182,7 +182,7 @@ const BenefitsSection = () => {
   }, [isMobile]);
 
   return (
-    <section id="rewards" className="relative py-32 px-6 overflow-hidden">
+    <section id="rewards" className="relative py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full">
       {/* Animated background stars */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(30)].map((_, i) => (

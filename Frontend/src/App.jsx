@@ -25,25 +25,27 @@ const AnimationFallback = () => (
 
 // Home component
 const Home = () => (
-  <div className="relative">
+  <div className="relative w-screen overflow-x-hidden">
     {/* Starfield Background - Lazy loaded */}
     <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
       <Starfield />
     </Suspense>
 
     {/* Content */}
-    <div className="relative z-10">
+    <div className="relative z-10 w-full">
       <Navbar />
-      <Suspense fallback={<AnimationFallback />}>
-        <HeroSection />
-      </Suspense>
-      <AboutSection />
-      <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-        <TimelineSection />
-      </Suspense>
-      <BenefitsSection />
-      <CTASection />
-      <Footer />
+      <div className="pt-16 sm:pt-20">
+        <Suspense fallback={<AnimationFallback />}>
+          <HeroSection />
+        </Suspense>
+        <AboutSection />
+        <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
+          <TimelineSection />
+        </Suspense>
+        <BenefitsSection />
+        <CTASection />
+        <Footer />
+      </div>
     </div>
   </div>
 );

@@ -75,10 +75,10 @@ const MobileTimeline = () => {
   ];
 
   return (
-    <div className="mobile-timeline">
+    <div className="mobile-timeline w-full px-4">
       <div className="mobile-timeline-container">
         {phases.map((phase, index) => (
-          <div key={index} className="mobile-timeline-item" style={{ '--delay': `${index * 0.1}s` }}>
+          <div key={index} className="mobile-timeline-item" style={{ '--delay': `${Math.min(index * 0.05, 0.3)}s` }}>
             <div className="mobile-timeline-marker" style={{ '--color': phase.color }} />
             <div className="mobile-timeline-content">
               <div className="mobile-timeline-week">{phase.week}</div>
