@@ -17,6 +17,8 @@ import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
+import About from './pages/About';
+import Rewards from './pages/Rewards';
 
 // Loading fallback component
 const AnimationFallback = () => (
@@ -60,6 +62,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/mentor/dashboard" element={<Dashboard />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/rewards" element={<Rewards />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<FAQ />} />
       </Routes>

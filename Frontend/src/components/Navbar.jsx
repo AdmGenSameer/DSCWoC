@@ -24,11 +24,11 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
+    { name: 'About', href: '/about', isRoute: true },
     { name: 'Timeline', href: '#timeline' },
     { name: 'Tracks', href: '#tracks' },
     { name: 'Projects', href: '#projects' },
-    { name: 'Rewards', href: '#rewards' },
+    { name: 'Rewards', href: '/rewards', isRoute: true },
     { name: 'FAQ', href: '/faq', isRoute: true },
     { name: 'Contact', href: '/contact', isRoute: true }
   ];
@@ -96,10 +96,11 @@ const Navbar = () => {
           onClick={() => navigate('/')}
         >
           <img 
-            src="/dscwoc-navbar-logo.png" 
-            alt="DSC WoC Logo" 
-            className="w-full h-full object-contain"
+            src="/clubLogo.png" 
+            alt="DSC Club Logo" 
+            className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
           />
+          <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
         </div>
 
         {/* Mobile Menu Button */}
