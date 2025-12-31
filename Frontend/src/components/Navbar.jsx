@@ -88,15 +88,18 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
         {/* Logo */}
         <div 
-          className="flex items-center space-x-2 cursor-pointer"
+          className={`flex items-center space-x-2 cursor-pointer transition-all duration-300 ${
+            scrolled 
+              ? 'w-12 h-12 sm:w-16 sm:h-16' 
+              : 'w-24 h-24 sm:w-40 sm:h-40'
+          }`}
           onClick={() => navigate('/')}
         >
           <img 
             src="/dscwoc-navbar-logo.png" 
             alt="DSC WoC Logo" 
-            className="w-24 h-24 sm:w-40 sm:h-40 object-contain"
+            className="w-full h-full object-contain"
           />
-          
         </div>
 
         {/* Mobile Menu Button */}
