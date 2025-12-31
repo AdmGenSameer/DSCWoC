@@ -1,15 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import Starfield from './components/Starfield';
+import Starships from './components/Starships';
 import Navbar from './components/Navbar';
+import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
+import TimelineSection from './components/TimelineSection';
 import BenefitsSection from './components/BenefitsSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
-
-// Lazy load heavy animation components
-const Starfield = lazy(() => import('./components/Starfield'));
-const HeroSection = lazy(() => import('./components/HeroSection'));
-const TimelineSection = lazy(() => import('./components/TimelineSection'));
 
 // Pages
 import Login from './pages/Login';
@@ -20,34 +18,24 @@ import FAQ from './pages/FAQ';
 import About from './pages/About';
 import Rewards from './pages/Rewards';
 
-// Loading fallback component
-const AnimationFallback = () => (
-  <div className="w-full h-screen bg-gradient-to-b from-slate-900 to-slate-950 animate-pulse" />
-);
-
 // Home component
 const Home = () => (
-  <div className="relative w-screen overflow-x-hidden">
-    {/* Starfield Background - Lazy loaded */}
-    <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
-      <Starfield />
-    </Suspense>
+  <div className="relative">
+    {/* Starfield Background */}
+    <Starfield />
+
+    {/* Roaming Starships */}
+    {/* <Starships /> */}
 
     {/* Content */}
-    <div className="relative z-10 w-full">
+    <div className="relative z-10">
       <Navbar />
-      <div className="pt-16 sm:pt-20">
-        <Suspense fallback={<AnimationFallback />}>
-          <HeroSection />
-        </Suspense>
-        <AboutSection />
-        <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-          <TimelineSection />
-        </Suspense>
-        <BenefitsSection />
-        <CTASection />
-        <Footer />
-      </div>
+      <HeroSection />
+      <AboutSection />
+      <TimelineSection />
+      <BenefitsSection />
+      <CTASection />
+      <Footer />
     </div>
   </div>
 );

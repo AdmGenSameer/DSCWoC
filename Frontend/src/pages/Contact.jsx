@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSubmitContact } from '../hooks/useApi'
 import Starfield from '../components/Starfield'
 
 const Contact = () => {
@@ -9,10 +8,10 @@ const Contact = () => {
     email: '',
     message: ''
   })
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState('')
   const navigate = useNavigate()
-  
-  // Use React Query mutation for form submission
-  const submitContact = useSubmitContact()
 
   const handleChange = (e) => {
     setFormData({
@@ -23,14 +22,32 @@ const Contact = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    // React Query mutation handles loading, error, and success states
-    submitContact.mutate(formData, {
-      onSuccess: () => {
-        // Clear form on successful submission
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const result = await response.json()
+
+      if (result.status === 'success') {
+        setSuccess(true)
         setFormData({ name: '', email: '', message: '' })
-      },
-    })
+      } else {
+        throw new Error(result.message || 'Failed to send message')
+      }
+    } catch (err) {
+      console.error('Contact form error:', err)
+      setError(err.message || 'Failed to send message. Please try again.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -110,17 +127,15 @@ const Contact = () => {
             <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8">
               <h3 className="text-2xl font-bold text-white mb-6">Send us a Message</h3>
               
-              {submitContact.isSuccess && (
+              {success && (
                 <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
                   <p className="text-green-300">Message sent successfully! We'll get back to you soon.</p>
                 </div>
               )}
 
-              {submitContact.isError && (
+              {error && (
                 <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <p className="text-red-300">
-                    {submitContact.error?.message || 'Failed to send message. Please try again.'}
-                  </p>
+                  <p className="text-red-300">{error}</p>
                 </div>
               )}
 
@@ -136,8 +151,7 @@ const Contact = () => {
                     value={formData.name}
                     onChange={handleChange}
                     required
-                    disabled={submitContact.isPending}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-stellar-cyan focus:ring-1 focus:ring-stellar-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-stellar-cyan focus:ring-1 focus:ring-stellar-cyan"
                     placeholder="Your full name"
                   />
                 </div>
@@ -153,8 +167,7 @@ const Contact = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    disabled={submitContact.isPending}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-stellar-cyan focus:ring-1 focus:ring-stellar-cyan disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-stellar-cyan focus:ring-1 focus:ring-stellar-cyan"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -169,19 +182,18 @@ const Contact = () => {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    disabled={submitContact.isPending}
                     rows={6}
-                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-stellar-cyan focus:ring-1 focus:ring-stellar-cyan resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-stellar-cyan focus:ring-1 focus:ring-stellar-cyan resize-none"
                     placeholder="Tell us how we can help you..."
                   />
                 </div>
 
                 <button
                   type="submit"
-                  disabled={submitContact.isPending}
+                  disabled={loading}
                   className="w-full bg-gradient-to-r from-stellar-cyan to-nebula-blue hover:from-stellar-cyan/80 hover:to-nebula-blue/80 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {submitContact.isPending ? 'Sending...' : 'Send Message'}
+                  {loading ? 'Sending...' : 'Send Message'}
                 </button>
               </form>
             </div>

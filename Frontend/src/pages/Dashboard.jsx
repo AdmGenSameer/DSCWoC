@@ -1,33 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { signOut } from '../lib/supabase'
-import { useLeaderboard, useBadges } from '../hooks/useApi'
 import Starfield from '../components/Starfield'
 
 const Dashboard = () => {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  
-  // Fetch leaderboard data
-  const { data: leaderboardData, isLoading: leaderboardLoading } = useLeaderboard(1, 100)
-  // Fetch badges
-  const { data: badgesData, isLoading: badgesLoading } = useBadges()
-
-  // Get user's rank from leaderboard
-  const getUserRank = () => {
-    if (!leaderboardData?.users || !user?.id) return 'N/A'
-    const rankIndex = leaderboardData.users.findIndex(u => u._id === user.id)
-    return rankIndex >= 0 ? rankIndex + 1 : 'N/A'
-  }
-
-  // Get user's badges
-  const getUserBadges = () => {
-    if (!user?.badges || !badgesData?.badges) return []
-    return badgesData.badges.filter(badge => 
-      user.badges.includes(badge._id)
-    )
-  }
 
   useEffect(() => {
     // Get user from localStorage
@@ -163,9 +142,7 @@ const Dashboard = () => {
                 </div>
                 <div className="ml-4">
                   <p className="text-gray-300 text-sm">Rank</p>
-                  <p className="text-2xl font-bold text-white">
-                    {leaderboardLoading ? '...' : `#${getUserRank()}`}
-                  </p>
+                  <p className="text-2xl font-bold text-white">#{user.stats?.rank || 'N/A'}</p>
                 </div>
               </div>
             </div>
@@ -174,11 +151,9 @@ const Dashboard = () => {
           {/* Badges Section */}
           <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 mb-8">
             <h2 className="text-xl font-bold text-white mb-4">Your Badges</h2>
-            {badgesLoading ? (
-              <p className="text-gray-400">Loading badges...</p>
-            ) : getUserBadges().length > 0 ? (
+            {user.badges && user.badges.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {getUserBadges().map((badge) => (
+                {user.badges.map((badge) => (
                   <div
                     key={badge._id}
                     className="bg-white/5 border border-white/10 rounded-lg p-4 text-center"

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useIsMobile } from '../hooks/useIsMobile';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,7 +9,6 @@ const AboutSection = () => {
   const computerRef = useRef(null);
   const [typedText, setTypedText] = useState('');
   const [currentLine, setCurrentLine] = useState(0);
-  const isMobile = useIsMobile();
 
   const terminalLines = [
     '> INITIALIZING MISSION PROTOCOL...',
@@ -41,35 +39,9 @@ const AboutSection = () => {
     '> AWAITING CREW REGISTRATION...',
   ];
 
-  // Typing effect function (desktop only)
-  const startTyping = () => {
-    let lineIndex = 0;
-    let charIndex = 0;
-    let fullText = '';
-
-    const typeInterval = setInterval(() => {
-      if (lineIndex < terminalLines.length) {
-        if (charIndex < terminalLines[lineIndex].length) {
-          fullText += terminalLines[lineIndex][charIndex];
-          setTypedText(fullText);
-          charIndex++;
-        } else {
-          fullText += '\n';
-          setTypedText(fullText);
-          lineIndex++;
-          charIndex = 0;
-          setCurrentLine(lineIndex);
-        }
-      } else {
-        clearInterval(typeInterval);
-      }
-    }, 30);
-  };
-
   useEffect(() => {
     const terminal = terminalRef.current;
     const computer = computerRef.current;
-    if (isMobile) return undefined;
     
     if (computer) {
       // 3D computer animation
@@ -126,64 +98,38 @@ const AboutSection = () => {
       );
     }
 
+    // Typing effect function
+    const startTyping = () => {
+      let lineIndex = 0;
+      let charIndex = 0;
+      let fullText = '';
+
+      const typeInterval = setInterval(() => {
+        if (lineIndex < terminalLines.length) {
+          if (charIndex < terminalLines[lineIndex].length) {
+            fullText += terminalLines[lineIndex][charIndex];
+            setTypedText(fullText);
+            charIndex++;
+          } else {
+            fullText += '\n';
+            setTypedText(fullText);
+            lineIndex++;
+            charIndex = 0;
+            setCurrentLine(lineIndex);
+          }
+        } else {
+          clearInterval(typeInterval);
+        }
+      }, 30);
+    };
+
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile]);
-
-  const mobileInsights = [
-    { label: 'Mission Status', value: 'Active', accent: 'from-cosmic-purple to-nebula-pink' },
-    { label: 'Objectives', value: '4 Weeks · 10 Phases', accent: 'from-stellar-cyan to-galaxy-violet' },
-    { label: 'Comms Link', value: 'Uplink Stable', accent: 'from-amber-400 to-orange-500' },
-    { label: 'Next Milestone', value: 'Orbit Phase I', accent: 'from-emerald-400 to-teal-500' },
-  ];
+  }, []);
 
   return (
     <section id="about" className="relative py-32 px-6" style={{ perspective: '1500px' }}>
-      {/* Mobile-only HUD bar */}
-      <div className="md:hidden max-w-3xl mx-auto mb-16 px-3">
-        <div className="text-center mb-4">
-          <h2 className="text-3xl font-bold text-white mb-1">Mission Briefing</h2>
-          <p className="text-xs text-gray-400">HUD · Live mission insights</p>
-        </div>
-
-        <div className="w-full rounded-2xl border border-white/10 bg-slate-900/70 backdrop-blur-md p-3 shadow-lg shadow-cosmic-purple/10">
-          <div className="flex items-center gap-2 text-[11px] text-gray-300 mb-3">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            LIVE FLIGHT HUD
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <div className="px-3 py-2 rounded-full bg-slate-800/70 border border-white/10 text-xs text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              Status: Active
-            </div>
-            <div className="px-3 py-2 rounded-full bg-slate-800/70 border border-white/10 text-xs text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-              Uplink: Stable
-            </div>
-            <div className="px-3 py-2 rounded-full bg-slate-800/70 border border-white/10 text-xs text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-              Power: 98%
-            </div>
-            <div className="px-3 py-2 rounded-full bg-slate-800/70 border border-white/10 text-xs text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              GPS: Locked
-            </div>
-            <div className="px-3 py-2 rounded-full bg-slate-800/70 border border-white/10 text-xs text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-pink-400"></span>
-              Crew: Synced
-            </div>
-            <div className="px-3 py-2 rounded-full bg-slate-800/70 border border-white/10 text-xs text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-violet-400"></span>
-              Next: Orbit Phase I
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop GSAP experience */}
-      <div className="hidden md:block">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-20">
           MISSION BRIEFING
@@ -352,7 +298,6 @@ const AboutSection = () => {
           </div>
         </div>
       </div>
-    </div>
     </section>
   );
 };

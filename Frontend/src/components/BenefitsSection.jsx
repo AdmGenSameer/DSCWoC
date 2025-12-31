@@ -1,13 +1,10 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { useIsMobile } from '../hooks/useIsMobile';
-import '../styles/MobileBenefits.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const BenefitsSection = () => {
-  const isMobile = useIsMobile();
   const cardRefs = useRef([]);
   const titleRef = useRef(null);
   const sectionRef = useRef(null);
@@ -59,8 +56,6 @@ const BenefitsSection = () => {
   ];
 
   useEffect(() => {
-    if (isMobile) return; // Skip GSAP animations on mobile
-
     // Animate title
     if (titleRef.current) {
       gsap.fromTo(
@@ -180,74 +175,10 @@ const BenefitsSection = () => {
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
-  }, [isMobile]);
+  }, []);
 
-  // Mobile Optimized Version
-  if (isMobile) {
-    return (
-      <section id="rewards" className="relative py-12 px-3 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible' }}>
-        {/* Animated background stars */}
-        <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-0.5 h-0.5 bg-white rounded-full animate-pulse"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                opacity: Math.random() * 0.5 + 0.2,
-              }}
-            />
-          ))}
-        </div>
-
-        <div className="relative z-10 max-w-2xl mx-auto">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">
-              <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-transparent bg-clip-text">
-                CREW BENEFITS
-              </span>
-            </h2>
-            <p className="text-xs text-gray-400">
-              Unlock cosmic rewards from across the galaxy
-            </p>
-          </div>
-
-          {/* Mobile Benefits Grid */}
-          <div className="mobile-benefits-container">
-            <div className="mobile-benefits-grid">
-              {benefits.map((benefit, index) => (
-                <div
-                  key={index}
-                  className="mobile-benefits-card animate-slideUp"
-                  style={{ animationDelay: `${index * 0.08}s` }}
-                >
-                  <div className="mobile-benefits-icon">{benefit.icon}</div>
-                  <h3 className="mobile-benefits-title">{benefit.title}</h3>
-                  <p className="mobile-benefits-description">{benefit.description}</p>
-                  <div
-                    className="mobile-benefits-accent"
-                    style={{ '--color': benefit.orbitColor }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-8">
-            <p className="text-gray-400 text-xs">Ready to claim rewards? 🌠</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // Desktop Version with GSAP
   return (
-    <section id="rewards" className="relative py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible', zIndex: 'auto' }}>
+    <section id="rewards" className="relative py-32 px-6 overflow-hidden">
       {/* Animated background stars */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(30)].map((_, i) => (
@@ -264,19 +195,19 @@ const BenefitsSection = () => {
         ))}
       </div>
 
-      <div className="max-w-7xl mx-auto relative z-10" style={{ position: 'relative' }}>
-        <div ref={titleRef} className="text-center mb-12 md:mb-20" style={{ opacity: 1, position: 'relative', zIndex: 10 }}>
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div ref={titleRef} className="text-center mb-20">
           <h2 className="text-7xl font-bold text-white mb-4 tracking-wider">
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 text-transparent bg-clip-text">
               CREW BENEFITS
             </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-gray-400 text-xl max-w-2xl mx-auto">
             Embark on this cosmic journey and unlock rewards from across the galaxy
           </p>
         </div>
 
-        <div ref={sectionRef} className="grid gap-6 md:gap-8 lg:gap-12 perspective-1000 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div ref={sectionRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 perspective-1000">
           {benefits.map((benefit, index) => (
             <div
               key={index}
@@ -296,12 +227,11 @@ const BenefitsSection = () => {
               {/* Card */}
               <div
                 ref={el => cardRefs.current[index] = el}
-                className="relative glass-effect rounded-3xl p-6 md:p-8 h-full group cursor-pointer overflow-hidden"
+                className="relative glass-effect rounded-3xl p-8 h-full group cursor-pointer overflow-hidden"
                 style={{
                   background: 'rgba(17, 24, 39, 0.7)',
                   backdropFilter: 'blur(12px)',
                   border: '1px solid rgba(255, 255, 255, 0.1)',
-                  opacity: 1,
                 }}
               >
                 {/* Gradient overlay */}
@@ -314,16 +244,16 @@ const BenefitsSection = () => {
                   <div className="absolute inset-0 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500">
                     <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${benefit.gradient}`} />
                   </div>
-                  <div className="relative transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 text-7xl">
+                  <div className="relative text-7xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
                     {benefit.icon}
                   </div>
                 </div>
 
                 {/* Content */}
-                <h3 className={`font-bold mb-3 md:mb-4 bg-gradient-to-r ${benefit.gradient} text-transparent bg-clip-text text-2xl`}>
+                <h3 className={`text-2xl font-bold mb-4 bg-gradient-to-r ${benefit.gradient} text-transparent bg-clip-text`}>
                   {benefit.title}
                 </h3>
-                <p className="leading-relaxed text-gray-300">
+                <p className="text-gray-300 leading-relaxed">
                   {benefit.description}
                 </p>
 
