@@ -96,7 +96,7 @@ const Navbar = () => {
             alt="DSC WoC Logo" 
             className="w-24 h-24 sm:w-40 sm:h-40 object-contain"
           />
-          <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
+          
         </div>
 
         {/* Mobile Menu Button */}
