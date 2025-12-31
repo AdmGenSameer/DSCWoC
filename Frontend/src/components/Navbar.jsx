@@ -92,7 +92,7 @@ const Navbar = () => {
           onClick={() => navigate('/')}
         >
           <img 
-            src="/Gemini_Generated_Image_73cykc73cykc73cy (1)(1).png" 
+            src="/Gemini_Generated_Image_73cykc73cykc73cy%20(1)(1).png" 
             alt="DSC WoC Logo" 
             className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
           />
