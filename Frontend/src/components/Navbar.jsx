@@ -94,7 +94,7 @@ const Navbar = () => {
           <img 
             src="/dscwoc-navbar-logo.png" 
             alt="DSC WoC Logo" 
-            className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+            className="w-12 h-12 sm:w-14 sm:h-14 object-contain"
           />
           <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
         </div>
