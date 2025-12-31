@@ -91,7 +91,11 @@ const Navbar = () => {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => navigate('/')}
         >
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-cosmic-purple to-nebula-pink glow-effect"></div>
+          <img 
+            src="/Gemini_Generated_Image_73cykc73cykc73cy(1).png" 
+            alt="DSC WoC Logo" 
+            className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+          />
           <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
         </div>
 
