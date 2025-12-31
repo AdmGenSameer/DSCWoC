@@ -24,11 +24,11 @@ const Navbar = () => {
 
   const navItems = [
     { name: 'Home', href: '#home' },
-    { name: 'About', href: '#about' },
+    { name: 'About', href: '/about', isRoute: true },
     { name: 'Timeline', href: '#timeline' },
     { name: 'Tracks', href: '#tracks' },
     { name: 'Projects', href: '#projects' },
-    { name: 'Rewards', href: '#rewards' },
+    { name: 'Rewards', href: '/rewards', isRoute: true },
     { name: 'FAQ', href: '/faq', isRoute: true },
     { name: 'Contact', href: '/contact', isRoute: true }
   ];
@@ -78,7 +78,11 @@ const Navbar = () => {
           className="flex items-center space-x-2 cursor-pointer"
           onClick={() => navigate('/')}
         >
-          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-cosmic-purple to-nebula-pink glow-effect"></div>
+          <img 
+            src="/clubLogo.png" 
+            alt="DSC Club Logo" 
+            className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+          />
           <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
         </div>
 
