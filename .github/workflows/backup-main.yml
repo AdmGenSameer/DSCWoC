@@ -1,0 +1,87 @@
+name: Timestamped backups of main
+
+on:
+  push:
+    branches: [ 'main' ]
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create timestamped backup branch
+        env:
+          GITHUB_TS: ${{ github.run_started_at }}
+        run: |
+          TS=$(date -u +"%Y%m%d-%H%M%S")
+          BACKUP_BRANCH="main-backup-${TS}"
+          echo "Creating backup branch: ${BACKUP_BRANCH}"
+          git checkout main
+          git pull --ff-only origin main || true
+          git checkout -b "${BACKUP_BRANCH}"
+          git push origin "${BACKUP_BRANCH}"
+
+      - name: Prune old backups (keep 30 days)
+        run: |
+          # Fetch remote refs and get list of backup branches
+          git fetch --prune origin +refs/heads/*:refs/remotes/origin/*
+
+          cutoff=$(date -u -d '30 days ago' +%s)
+
+          git for-each-ref --format='%(refname:short) %(committerdate:unix)' refs/remotes/origin/main-backup-* | while read -r ref ts; do
+            if [ -z "$ref" ] || [ -z "$ts" ]; then
+              continue
+            fi
+            if [ "$ts" -lt "$cutoff" ]; then
+              remote_branch=${ref#origin/}
+              echo "Deleting remote old backup: $remote_branch"
+              git push origin --delete "$remote_branch" || true
+            fi
+          done
+name: Mirror main to main-backup
+
+on:
+  push:
+    branches: [ 'main' ]
+  schedule:
+    - cron: '0 2 * * *' # daily at 02:00 UTC
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create or update main-backup branch
+        run: |
+          # Ensure main is checked out and up-to-date
+          git checkout main
+          git pull origin main
+
+          # Create or update main-backup to match main
+          if git show-ref --verify --quiet refs/heads/main-backup; then
+            git branch -D main-backup || true
+          fi
+          git checkout -b main-backup
+
+          # Force push the backup branch to origin
+          git push --force origin main-backup
