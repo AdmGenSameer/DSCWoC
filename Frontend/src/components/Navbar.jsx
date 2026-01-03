@@ -3,13 +3,22 @@ import { useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [shrinkProgress, setShrinkProgress] = useState(0); // 0 -> not scrolled, 1 -> fully shrunk
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  const logoBaseWidth = 140; // default wide logo width
+  const logoMinWidth = 56; // width at full shrink
+
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      const y = window.scrollY;
+      const start = 10; // when shrinking starts
+      const end = 220; // when fully shrunk
+      const prog = Math.min(1, Math.max(0, (y - start) / (end - start)));
+      setShrinkProgress(prog);
+      setScrolled(y > start);
     };
 
     // Check if user is logged in
@@ -86,21 +95,30 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
-        {/* Logo */}
-        <div 
-          className={`flex items-center space-x-2 cursor-pointer transition-all duration-300 ${
-            scrolled 
-              ? 'w-12 h-12 sm:w-16 sm:h-16' 
-              : 'w-24 h-24 sm:w-40 sm:h-40'
-          }`}
-          onClick={() => navigate('/')}
-        >
-          <img 
-            src="/clubLogo.png" 
-            alt="DSC Club Logo" 
-            className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+        {/* Logo with sticky-corner behavior */}
+        <div className="relative flex items-center">
+          {/* Invisible spacer preserves layout while the logo is absolutely positioned */}
+          <div
+            className="invisible"
+            style={{ width: `${logoBaseWidth}px`, height: '64px' }}
+            aria-hidden
           />
-          <span className="text-lg sm:text-xl font-bold text-white">DSC WoC</span>
+
+          <div
+            className="absolute top-0 left-0 flex items-center cursor-pointer transition-all duration-300"
+            onClick={() => navigate('/')}
+            style={{
+              transform: `translate(${ -24 * shrinkProgress }px, ${ -10 * shrinkProgress }px) scale(${1 - 0.45 * shrinkProgress})`,
+              transformOrigin: 'left top'
+            }}
+          >
+            <img
+              src="/dscwoc-navbar-logo.png"
+              alt="DSCWOC Logo"
+              className="object-contain transition-all duration-300"
+              style={{ width: `${logoBaseWidth - (logoBaseWidth - logoMinWidth) * shrinkProgress}px`, height: 'auto' }}
+            />
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
