@@ -32,7 +32,7 @@ const Navbar = () => {
     { name: 'Home', href: '#home' },
     { name: 'About', href: '/about', isRoute: true },
     { name: 'Timeline', href: '#timeline' },
-    { name: 'Projects', href: '#projects' },
+    { name: 'Projects', href: '/projects', isRoute: true },
     { name: 'Rewards', href: '/rewards', isRoute: true },
     { name: 'FAQ', href: '/faq', isRoute: true },
     { name: 'Contact', href: '/contact', isRoute: true }
