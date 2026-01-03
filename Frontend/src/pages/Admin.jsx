@@ -10,7 +10,8 @@ import {
   Award,
   AlertCircle,
   Download,
-  RefreshCw
+  RefreshCw,
+  Mail
 } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
@@ -23,6 +24,7 @@ const Admin = () => {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [prs, setPrs] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const [error, setError] = useState(null);
 
   // Get auth token
@@ -111,6 +113,24 @@ const Admin = () => {
     }
   };
 
+  // Fetch contacts
+  const fetchContacts = async () => {
+    try {
+      const token = getAuthToken();
+      const response = await fetch(`${API_BASE_URL}/admin/contacts?limit=50`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch contacts');
+      const data = await response.json();
+      setContacts(data.data.contacts);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     const loadData = async () => {
@@ -126,6 +146,7 @@ const Admin = () => {
     if (activeTab === 'users' && users.length === 0) fetchUsers();
     if (activeTab === 'projects' && projects.length === 0) fetchProjects();
     if (activeTab === 'prs' && prs.length === 0) fetchPRs();
+    if (activeTab === 'contacts' && contacts.length === 0) fetchContacts();
   }, [activeTab]);
 
   if (loading) {
@@ -171,6 +192,7 @@ const Admin = () => {
               { id: 'users', label: 'Users', icon: Users },
               { id: 'projects', label: 'Projects', icon: FolderGit2 },
               { id: 'prs', label: 'Pull Requests', icon: GitPullRequest },
+              { id: 'contacts', label: 'Messages', icon: Mail },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -202,6 +224,10 @@ const Admin = () => {
 
           {activeTab === 'prs' && (
             <PRsSection prs={prs} onRefresh={fetchPRs} />
+          )}
+
+          {activeTab === 'contacts' && (
+            <ContactsSection contacts={contacts} onRefresh={fetchContacts} />
           )}
         </main>
       </div>
@@ -465,6 +491,54 @@ const PRsSection = ({ prs, onRefresh }) => {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+};
+
+// Contacts Section Component
+const ContactsSection = ({ contacts, onRefresh }) => {
+  return (
+    <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-white font-semibold">Contact Messages</h3>
+        <button 
+          onClick={onRefresh}
+          className="text-cosmic-purple hover:text-nebula-pink transition-colors"
+        >
+          <RefreshCw className="w-5 h-5" />
+        </button>
+      </div>
+      
+      <div className="space-y-4">
+        {contacts.length === 0 ? (
+          <p className="text-gray-400 text-center py-8">No contact messages yet</p>
+        ) : (
+          contacts.map((contact) => (
+            <div key={contact._id} className="bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-colors">
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <p className="text-white font-medium">{contact.name}</p>
+                  <p className="text-cosmic-purple text-sm">{contact.email}</p>
+                </div>
+                <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ml-2 ${
+                  contact.status === 'New' ? 'bg-blue-500/20 text-blue-300' :
+                  contact.status === 'Read' ? 'bg-yellow-500/20 text-yellow-300' :
+                  'bg-green-500/20 text-green-300'
+                }`}>
+                  {contact.status}
+                </span>
+              </div>
+              <p className="text-gray-300 text-sm mb-3">{contact.message}</p>
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span>{new Date(contact.createdAt).toLocaleDateString()} {new Date(contact.createdAt).toLocaleTimeString()}</span>
+                {contact.respondedBy && (
+                  <span>Responded by @{contact.respondedBy.username}</span>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

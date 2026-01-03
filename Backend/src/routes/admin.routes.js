@@ -24,6 +24,12 @@ import {
   exportPRs,
   exportLeaderboard
 } from '../controllers/admin.controller.js';
+import {
+  getAllContacts,
+  updateContactStatus,
+  deleteContact,
+  getContactStats
+} from '../controllers/contact.controller.js';
 
 const router = express.Router();
 
@@ -60,6 +66,12 @@ router.post('/points/recalculate', recalculatePoints);
 // ==================== BADGES & CERTIFICATES ====================
 router.get('/badges', getAllBadges);
 router.post('/badges/assign', assignBadge);
+
+// ==================== CONTACT MESSAGES ====================
+router.get('/contacts', getAllContacts);
+router.get('/contacts/stats', getContactStats);
+router.patch('/contacts/:id/status', updateContactStatus);
+router.delete('/contacts/:id', deleteContact);
 
 // ==================== EXPORTS & REPORTS ====================
 router.get('/export/users', exportUsers);
