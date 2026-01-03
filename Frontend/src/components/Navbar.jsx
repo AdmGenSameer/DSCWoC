@@ -99,7 +99,7 @@ const Navbar = () => {
             className="flex items-center cursor-pointer transition-all duration-300"
             onClick={() => navigate('/')}
             style={{
-              transform: `scale(${1 - 0.25 * shrinkProgress})`, // Shrinks to 75% on scroll
+              transform: `scale(${1 - 0.08 * shrinkProgress})`, // Barely shrinks to 92% on scroll
               transformOrigin: 'left center'
             }}
           >
