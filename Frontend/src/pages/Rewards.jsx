@@ -73,6 +73,7 @@ const BlurredSection = ({ title, children }) => {
   )
 }
 
+
 const Rewards = () => {
   const navigate = useNavigate()
   const [prizeRevealed, setPrizeRevealed] = useState(false)

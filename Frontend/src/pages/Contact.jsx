@@ -75,7 +75,7 @@ const Contact = () => {
                   </div>
                   <div>
                     <h3 className="text-white font-medium">GitHub</h3>
-                    <p className="text-gray-300">@dsc-community</p>
+                    <a href="https://github.com/cdsvitbhopal" target="_blank" rel="noopener noreferrer" className="text-stellar-cyan hover:underline">cdsvitbhopal</a>
                   </div>
                 </div>
 
