@@ -9,7 +9,7 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   const logoBaseWidth = 140; // default wide logo width
-  const logoMinWidth = 56; // width at full shrink
+  const logoMinWidth = 90; // width at full shrink
 
   useEffect(() => {
     const handleScroll = () => {
