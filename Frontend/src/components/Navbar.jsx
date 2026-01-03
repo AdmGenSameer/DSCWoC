@@ -8,14 +8,11 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const logoBaseWidth = 140; // default wide logo width
-  const logoMinWidth = 90; // width at full shrink
-
   useEffect(() => {
     const handleScroll = () => {
       const y = window.scrollY;
       const start = 10; // when shrinking starts
-      const end = 220; // when fully shrunk
+      const end = 150; // when fully shrunk (reduced from 220)
       const prog = Math.min(1, Math.max(0, (y - start) / (end - start)));
       setShrinkProgress(prog);
       setScrolled(y > start);
@@ -95,28 +92,21 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-between">
-        {/* Logo with sticky-corner behavior */}
+        {/* Logo - Responsive sizing with Tailwind */}
         <div className="relative flex items-center">
-          {/* Invisible spacer preserves layout while the logo is absolutely positioned */}
+          {/* Base logo container - scales with Tailwind */}
           <div
-            className="invisible"
-            style={{ width: `${logoBaseWidth}px`, height: '64px' }}
-            aria-hidden
-          />
-
-          <div
-            className="absolute top-0 left-0 flex items-center cursor-pointer transition-all duration-300"
+            className="flex items-center cursor-pointer transition-all duration-300"
             onClick={() => navigate('/')}
             style={{
-              transform: `translate(${ -24 * shrinkProgress }px, ${ -10 * shrinkProgress }px) scale(${1 - 0.45 * shrinkProgress})`,
-              transformOrigin: 'left top'
+              transform: `scale(${1 - 0.2 * shrinkProgress})`, // Only shrinks to 80%, not 55%
+              transformOrigin: 'left center'
             }}
           >
             <img
               src="/dscwoc-navbar-logo.png"
               alt="DSCWOC Logo"
-              className="object-contain transition-all duration-300"
-              style={{ width: `${logoBaseWidth - (logoBaseWidth - logoMinWidth) * shrinkProgress}px`, height: 'auto' }}
+              className="object-contain transition-all duration-300 w-32 sm:w-40 md:w-40 lg:w-44"
             />
           </div>
         </div>
