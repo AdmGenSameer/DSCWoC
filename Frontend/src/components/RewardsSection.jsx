@@ -115,7 +115,7 @@ const RewardsSection = () => {
 
   const leaderboardTiers = [
     {
-      rank: 'Top 1–5 Contributors',
+      rank: '🥇 Top 1–5 Contributors',
       rankIcon: Trophy,
       title: 'Core Team Fast-Track',
       rewards: [
@@ -124,33 +124,33 @@ const RewardsSection = () => {
         { icon: Cloud, text: 'Cloud Credits (AWS / DigitalOcean / Heroku / Supabase)' },
         { icon: Globe, text: 'Premium Developer Domain (1 year)' },
         { icon: Award, text: 'Elite Contributor Certificate' },
-        { icon: Medal, text: 'Legendary Badge' },
+        { icon: Medal, text: '🌟 Legendary Badge' },
         { icon: Megaphone, text: 'Featured across official DSC platforms' },
       ],
       isGold: true,
       astronautIcon: Zap,
     },
     {
-      rank: 'Top 6–15 Contributors',
+      rank: '🥈 Top 6–15 Contributors',
       rankIcon: Medal,
       title: 'Stellar Achievers',
       rewards: [
-        { icon: Cloud, text: 'Cloud & SaaS credits' },
-        { icon: Globe, text: 'Free domain' },
+        { icon: Cloud, text: 'Cloud & SaaS Credits' },
+        { icon: Globe, text: 'Free Developer Domain' },
         { icon: Award, text: 'Top Contributor – Verified Certificate' },
-        { icon: Medal, text: 'Achiever Badge' },
+        { icon: Medal, text: '✨ Achiever Badge' },
         { icon: Megaphone, text: 'Public recognition on website & socials' },
       ],
       isSilver: true,
       astronautIcon: Zap,
     },
     {
-      rank: 'All Contributors',
+      rank: '🌠 All Contributors',
       rankIcon: Award,
       title: 'Open Source Explorers',
       rewards: [
         { icon: Award, text: 'Verified Participation Certificate' },
-        { icon: Medal, text: 'Open Source Explorer Badge' },
+        { icon: Medal, text: '🌌 Open Source Explorer Badge' },
         { icon: Link, text: 'GitHub-linked contribution record' },
         { icon: BookOpen, text: 'Access to expert sessions & workshops' },
       ],
@@ -296,17 +296,16 @@ const RewardsSection = () => {
             <Star className="w-5 h-5 text-yellow-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
             <Star className="w-5 h-5 text-yellow-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
           </div>
-          <p className="text-lg sm:text-xl text-gray-300 mb-4 flex items-center justify-center gap-2">
-            <Telescope className="w-5 h-5 text-purple-400" />
-            <span>Journey through our <span className="text-purple-300 font-semibold">reward galaxy</span></span>
-            <Telescope className="w-5 h-5 text-blue-400" />
+          <p className="text-lg sm:text-xl text-gray-300 mb-4 text-center">
+            Journey through our <span className="text-purple-300 font-semibold">reward galaxy</span>
           </p>
           <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto mb-6">
-            In the vast universe of open source, every contribution creates ripples. Navigate through our cosmic reward system where your efforts illuminate the path to recognition, growth, and stellar opportunities.
+            In the vast universe of open source, every contribution creates ripples.
+            Navigate through our cosmic reward system where your efforts illuminate the path to recognition, growth, and stellar opportunities.
           </p>
           <p className="text-sm sm:text-base text-purple-400 italic flex items-center justify-center gap-2">
             <Moon className="w-4 h-4 animate-pulse" />
-            <span>New celestial rewards unlock as your journey progresses</span>
+            <span>✨ New celestial rewards unlock as your journey progresses.</span>
             <Moon className="w-4 h-4 animate-pulse" style={{ animationDelay: '0.5s' }} />
           </p>
         </div>
@@ -420,7 +419,8 @@ const RewardsSection = () => {
               </h3>
               <Star className="w-6 h-6 text-blue-400 animate-pulse" style={{ animationDelay: '0.3s' }} />
             </div>
-            <p className="text-gray-400 mb-8">Ascend through the cosmos based on your contributions</p>
+            <p className="text-gray-400 mb-4">Ascend through the cosmos based on your contributions</p>
+            <p className="text-sm text-purple-300 italic mb-8">Rewards are based on contribution quality, consistency, and impact.</p>
 
             {/* Tier Progression Bar - Hidden on Mobile */}
             <div 
@@ -482,26 +482,26 @@ const RewardsSection = () => {
           </div>
 
           {/* Tier Cards - Visible on All Devices */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 bg-gradient-to-b from-slate-900/50 to-transparent rounded-3xl p-8 sm:p-12">
             {leaderboardTiers.map((tier, index) => (
               <div
                 key={index}
                 ref={(el) => {
                   if (el) tiers.current[index] = el;
                 }}
-                className={`relative group rounded-2xl p-8 backdrop-blur-sm border-2 transition-all duration-500 hover:scale-105 overflow-hidden ${
+                className={`relative group rounded-2xl p-8 border-2 transition-all duration-500 hover:scale-105 overflow-hidden ${
                   tier.isGold
-                    ? 'bg-gradient-to-br from-yellow-900/50 via-amber-800/40 to-orange-900/50 border-yellow-400/60 lg:scale-105 shadow-2xl shadow-yellow-500/30 hover:shadow-yellow-400/50'
+                    ? 'bg-gradient-to-br from-amber-900 via-yellow-800 to-orange-900 border-yellow-500 lg:scale-105 shadow-2xl shadow-yellow-500/50 hover:shadow-yellow-400/70'
                     : tier.isSilver
-                    ? 'bg-gradient-to-br from-slate-800/50 via-gray-700/40 to-slate-800/50 border-slate-400/60 shadow-2xl shadow-slate-400/20 hover:shadow-slate-300/40'
-                    : 'bg-gradient-to-br from-orange-900/40 via-amber-800/30 to-orange-900/40 border-orange-500/50 shadow-xl shadow-orange-500/20 hover:shadow-orange-400/30'
+                    ? 'bg-gradient-to-br from-slate-700 via-slate-600 to-slate-700 border-slate-400 shadow-2xl shadow-slate-400/40 hover:shadow-slate-300/60'
+                    : 'bg-gradient-to-br from-orange-800 via-amber-700 to-orange-800 border-orange-500 shadow-xl shadow-orange-500/40 hover:shadow-orange-400/60'
                 }`}
               >
                 {/* Cosmic glow effect */}
-                <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500 ${
-                  tier.isGold ? 'bg-gradient-to-t from-yellow-400/50 to-transparent' :
-                  tier.isSilver ? 'bg-gradient-to-t from-slate-300/50 to-transparent' :
-                  'bg-gradient-to-t from-orange-400/50 to-transparent'
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-500 ${
+                  tier.isGold ? 'bg-gradient-to-t from-yellow-400/60 to-transparent' :
+                  tier.isSilver ? 'bg-gradient-to-t from-slate-300/60 to-transparent' :
+                  'bg-gradient-to-t from-orange-400/60 to-transparent'
                 }`} />
 
                 {/* Shimmer overlay on hover */}
