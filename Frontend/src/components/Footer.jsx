@@ -1,4 +1,5 @@
 import { Github, Linkedin, Mail, Instagram } from 'lucide-react';
+
 const Footer = () => {
   return (
     <footer className="relative py-12 px-6 border-t border-cosmic-purple/10">
@@ -66,8 +67,10 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-cosmic-purple/10 text-center text-gray-400 text-sm">
-          <p>© 2025 DSC Community. All rights reserved. Built with 💜 for open source.</p>
+        <div className="pt-8 border-t border-cosmic-purple/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-gray-400 text-sm text-center sm:text-left">
+            © 2025 DSC Community. All rights reserved. Built with 💜 for open source.
+          </p>
         </div>
       </div>
     </footer>
