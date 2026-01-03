@@ -99,14 +99,14 @@ const Navbar = () => {
             className="flex items-center cursor-pointer transition-all duration-300"
             onClick={() => navigate('/')}
             style={{
-              transform: `scale(${1 - 0.2 * shrinkProgress})`, // Only shrinks to 80%, not 55%
+              transform: `scale(${1 - 0.08 * shrinkProgress})`, // Only shrinks to 92%, very minimal
               transformOrigin: 'left center'
             }}
           >
             <img
               src="/dscwoc-navbar-logo.png"
               alt="DSCWOC Logo"
-              className="object-contain transition-all duration-300 w-32 sm:w-40 md:w-40 lg:w-44"
+              className="object-contain transition-all duration-300 w-24 sm:w-28 md:w-32 lg:w-36"
             />
           </div>
         </div>
