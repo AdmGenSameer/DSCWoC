@@ -20,6 +20,7 @@ import FAQ from './pages/FAQ';
 import About from './pages/About';
 import Rewards from './pages/Rewards';
 import Projects from './pages/Projects';
+import Admin from './pages/Admin';
 
 // Loading fallback component
 const AnimationFallback = () => (
@@ -73,7 +74,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<Dashboard />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/mentor/dashboard" element={<Dashboard />} />
         <Route path="/about" element={<About />} />
         <Route path="/projects" element={<Projects />} />

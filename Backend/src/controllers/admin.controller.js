@@ -1,0 +1,978 @@
+import User from '../models/User.model.js';
+import Project from '../models/Project.model.js';
+import PullRequest from '../models/PullRequest.model.js';
+import Badge from '../models/Badge.model.js';
+import { HTTP_STATUS } from '../config/constants.js';
+import { successResponse, errorResponse } from '../utils/response.js';
+import logger from '../utils/logger.js';
+
+/**
+ * Get Admin Dashboard Overview Statistics
+ * @route GET /api/admin/overview
+ */
+export const getOverview = async (req, res) => {
+  try {
+    // Total registrations
+    const totalUsers = await User.countDocuments();
+    const activeContributors = await User.countDocuments({ 
+      role: 'Contributor', 
+      isActive: true 
+    });
+
+    // Total projects
+    const totalProjects = await Project.countDocuments();
+    const activeProjects = await Project.countDocuments({ isActive: true });
+
+    // Pull requests stats
+    const totalPRs = await PullRequest.countDocuments();
+    const mergedPRs = await PullRequest.countDocuments({ status: 'Merged' });
+    const pendingPRs = await PullRequest.countDocuments({ status: 'Pending' });
+
+    // Points distributed
+    const pointsResult = await User.aggregate([
+      { $group: { _id: null, totalPoints: { $sum: '$totalPoints' } } }
+    ]);
+    const totalPointsDistributed = pointsResult[0]?.totalPoints || 0;
+
+    // Badges issued
+    const totalBadgesIssued = await User.aggregate([
+      { $project: { badgeCount: { $size: '$badges' } } },
+      { $group: { _id: null, total: { $sum: '$badgeCount' } } }
+    ]);
+    const badgesIssued = totalBadgesIssued[0]?.total || 0;
+
+    // Recent activity (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // PRs per day for last 30 days
+    const prsPerDay = await PullRequest.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Top 5 contributors
+    const topContributors = await User.find({ role: 'Contributor' })
+      .sort({ totalPoints: -1 })
+      .limit(5)
+      .select('username fullName avatar_url totalPoints')
+      .lean();
+
+    // Projects with no activity (no PRs in last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const inactiveProjects = await Project.find({
+      isActive: true,
+      updatedAt: { $lt: sevenDaysAgo }
+    }).countDocuments();
+
+    res.json(successResponse({
+      stats: {
+        totalUsers,
+        activeContributors,
+        totalProjects,
+        activeProjects,
+        totalPRs,
+        mergedPRs,
+        pendingPRs,
+        totalPointsDistributed,
+        badgesIssued
+      },
+      charts: {
+        prsPerDay
+      },
+      topContributors,
+      alerts: {
+        pendingPRs,
+        inactiveProjects
+      }
+    }, 'Admin overview fetched successfully'));
+
+  } catch (error) {
+    logger.error('Error fetching admin overview:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch overview statistics')
+    );
+  }
+};
+
+/**
+ * Get all users with filters
+ * @route GET /api/admin/users
+ */
+export const getAllUsers = async (req, res) => {
+  try {
+    const { role, track, status, search, page = 1, limit = 20 } = req.query;
+
+    const filter = {};
+    if (role) filter.role = role;
+    if (track) filter.track = track;
+    if (status) filter.isActive = status === 'active';
+    if (search) {
+      filter.$or = [
+        { username: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const users = await User.find(filter)
+      .select('-__v')
+      .populate('badges', 'name icon')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await User.countDocuments(filter);
+
+    res.json(successResponse({
+      users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    }, 'Users fetched successfully'));
+
+  } catch (error) {
+    logger.error('Error fetching users:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch users')
+    );
+  }
+};
+
+/**
+ * Update user role
+ * @route PATCH /api/admin/users/:id/role
+ */
+export const updateUserRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role, reason } = req.body;
+
+    const validRoles = ['Contributor', 'Mentor', 'Admin'];
+    if (!validRoles.includes(role)) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Invalid role')
+      );
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('User not found')
+      );
+    }
+
+    const oldRole = user.role;
+    user.role = role;
+    await user.save();
+
+    // Log the action
+    logger.info(`Admin ${req.user.username} changed role of ${user.username} from ${oldRole} to ${role}. Reason: ${reason || 'N/A'}`);
+
+    res.json(successResponse(
+      { user: { id: user._id, username: user.username, role: user.role } },
+      'User role updated successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error updating user role:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to update user role')
+    );
+  }
+};
+
+/**
+ * Update user status (active/inactive)
+ * @route PATCH /api/admin/users/:id/status
+ */
+export const updateUserStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive, reason } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('User not found')
+      );
+    }
+
+    user.isActive = isActive;
+    await user.save();
+
+    logger.info(`Admin ${req.user.username} ${isActive ? 'activated' : 'deactivated'} user ${user.username}. Reason: ${reason || 'N/A'}`);
+
+    res.json(successResponse(
+      { user: { id: user._id, username: user.username, isActive: user.isActive } },
+      `User ${isActive ? 'activated' : 'deactivated'} successfully`
+    ));
+
+  } catch (error) {
+    logger.error('Error updating user status:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to update user status')
+    );
+  }
+};
+
+/**
+ * Manually adjust user points
+ * @route PATCH /api/admin/users/:id/points
+ */
+export const adjustUserPoints = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { points, reason } = req.body;
+
+    if (typeof points !== 'number' || !reason) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Points (number) and reason are required')
+      );
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('User not found')
+      );
+    }
+
+    const oldPoints = user.totalPoints;
+    user.totalPoints = Math.max(0, user.totalPoints + points);
+    await user.save();
+
+    logger.warn(`Admin ${req.user.username} adjusted points for ${user.username} from ${oldPoints} to ${user.totalPoints}. Change: ${points}. Reason: ${reason}`);
+
+    res.json(successResponse(
+      { 
+        user: { 
+          id: user._id, 
+          username: user.username, 
+          oldPoints, 
+          newPoints: user.totalPoints,
+          change: points
+        } 
+      },
+      'User points adjusted successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error adjusting user points:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to adjust user points')
+    );
+  }
+};
+
+/**
+ * Get user's PR history
+ * @route GET /api/admin/users/:id/prs
+ */
+export const getUserPRHistory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('User not found')
+      );
+    }
+
+    const prs = await PullRequest.find({ contributor: id })
+      .populate('project', 'name repoLink')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(successResponse(
+      { user: { username: user.username, fullName: user.fullName }, prs },
+      'User PR history fetched successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error fetching user PR history:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch PR history')
+    );
+  }
+};
+
+// ==================== PROJECT MANAGEMENT ====================
+
+/**
+ * Get all projects with filters
+ * @route GET /api/admin/projects
+ */
+export const getAllProjects = async (req, res) => {
+  try {
+    const { track, status, search, page = 1, limit = 20 } = req.query;
+
+    const filter = {};
+    if (track) filter.track = track;
+    if (status) filter.isActive = status === 'active';
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const projects = await Project.find(filter)
+      .populate('mentor', 'username fullName avatar_url')
+      .populate('contributors', 'username')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    // Add PR count for each project
+    const projectsWithStats = await Promise.all(
+      projects.map(async (project) => {
+        const prCount = await PullRequest.countDocuments({ project: project._id });
+        return { ...project, prCount };
+      })
+    );
+
+    const total = await Project.countDocuments(filter);
+
+    res.json(successResponse({
+      projects: projectsWithStats,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    }, 'Projects fetched successfully'));
+
+  } catch (error) {
+    logger.error('Error fetching projects:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch projects')
+    );
+  }
+};
+
+/**
+ * Create/Approve a new project
+ * @route POST /api/admin/projects
+ */
+export const createProject = async (req, res) => {
+  try {
+    const { name, description, repoLink, track, techStack, difficulty, mentor } = req.body;
+
+    // Check if project already exists
+    const existingProject = await Project.findOne({ repoLink });
+    if (existingProject) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Project with this repository already exists')
+      );
+    }
+
+    const project = new Project({
+      name,
+      description,
+      repoLink,
+      track,
+      techStack,
+      difficulty,
+      mentor,
+      isActive: true
+    });
+
+    await project.save();
+
+    logger.info(`Admin ${req.user.username} created project: ${name}`);
+
+    res.status(HTTP_STATUS.CREATED).json(successResponse(
+      { project },
+      'Project created successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error creating project:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to create project')
+    );
+  }
+};
+
+/**
+ * Update project details
+ * @route PATCH /api/admin/projects/:id
+ */
+export const updateProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const project = await Project.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).populate('mentor', 'username fullName');
+
+    if (!project) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Project not found')
+      );
+    }
+
+    logger.info(`Admin ${req.user.username} updated project: ${project.name}`);
+
+    res.json(successResponse(
+      { project },
+      'Project updated successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error updating project:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to update project')
+    );
+  }
+};
+
+/**
+ * Assign/Change project mentor
+ * @route PATCH /api/admin/projects/:id/mentor
+ */
+export const assignMentor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { mentorId } = req.body;
+
+    const mentor = await User.findById(mentorId);
+    if (!mentor || mentor.role !== 'Mentor') {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Invalid mentor ID or user is not a mentor')
+      );
+    }
+
+    const project = await Project.findByIdAndUpdate(
+      id,
+      { mentor: mentorId },
+      { new: true }
+    ).populate('mentor', 'username fullName');
+
+    if (!project) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Project not found')
+      );
+    }
+
+    logger.info(`Admin ${req.user.username} assigned mentor ${mentor.username} to project ${project.name}`);
+
+    res.json(successResponse(
+      { project },
+      'Mentor assigned successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error assigning mentor:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to assign mentor')
+    );
+  }
+};
+
+/**
+ * Deactivate/Activate project
+ * @route PATCH /api/admin/projects/:id/status
+ */
+export const toggleProjectStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive, reason } = req.body;
+
+    const project = await Project.findById(id);
+    if (!project) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Project not found')
+      );
+    }
+
+    project.isActive = isActive;
+    await project.save();
+
+    logger.info(`Admin ${req.user.username} ${isActive ? 'activated' : 'deactivated'} project ${project.name}. Reason: ${reason || 'N/A'}`);
+
+    res.json(successResponse(
+      { project: { id: project._id, name: project.name, isActive: project.isActive } },
+      `Project ${isActive ? 'activated' : 'deactivated'} successfully`
+    ));
+
+  } catch (error) {
+    logger.error('Error toggling project status:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to update project status')
+    );
+  }
+};
+
+// ==================== PULL REQUEST MONITORING ====================
+
+/**
+ * Get all PRs with filters
+ * @route GET /api/admin/prs
+ */
+export const getAllPRs = async (req, res) => {
+  try {
+    const { project, contributor, status, dateFrom, dateTo, page = 1, limit = 20 } = req.query;
+
+    const filter = {};
+    if (project) filter.project = project;
+    if (contributor) filter.contributor = contributor;
+    if (status) filter.status = status;
+    
+    if (dateFrom || dateTo) {
+      filter.createdAt = {};
+      if (dateFrom) filter.createdAt.$gte = new Date(dateFrom);
+      if (dateTo) filter.createdAt.$lte = new Date(dateTo);
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const prs = await PullRequest.find(filter)
+      .populate('contributor', 'username fullName avatar_url')
+      .populate('project', 'name repoLink')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit))
+      .lean();
+
+    const total = await PullRequest.countDocuments(filter);
+
+    res.json(successResponse({
+      prs,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / parseInt(limit))
+      }
+    }, 'Pull requests fetched successfully'));
+
+  } catch (error) {
+    logger.error('Error fetching PRs:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch pull requests')
+    );
+  }
+};
+
+/**
+ * Update PR status (verify/reject spam)
+ * @route PATCH /api/admin/prs/:id/status
+ */
+export const updatePRStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, reason, adminNote } = req.body;
+
+    const validStatuses = ['Pending', 'Merged', 'Rejected'];
+    if (!validStatuses.includes(status)) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Invalid status')
+      );
+    }
+
+    const pr = await PullRequest.findById(id)
+      .populate('contributor', 'username totalPoints');
+
+    if (!pr) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Pull request not found')
+      );
+    }
+
+    const oldStatus = pr.status;
+
+    // If rejecting a previously merged PR, deduct points
+    if (oldStatus === 'Merged' && status === 'Rejected' && pr.pointsAwarded > 0) {
+      const contributor = pr.contributor;
+      contributor.totalPoints = Math.max(0, contributor.totalPoints - pr.pointsAwarded);
+      await contributor.save();
+      logger.warn(`Admin ${req.user.username} rejected PR and deducted ${pr.pointsAwarded} points from ${contributor.username}`);
+    }
+
+    pr.status = status;
+    if (adminNote) pr.adminNote = adminNote;
+    await pr.save();
+
+    logger.info(`Admin ${req.user.username} changed PR #${pr.prNumber} status from ${oldStatus} to ${status}. Reason: ${reason || 'N/A'}`);
+
+    res.json(successResponse(
+      { pr: { id: pr._id, prNumber: pr.prNumber, status: pr.status } },
+      'PR status updated successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error updating PR status:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to update PR status')
+    );
+  }
+};
+
+/**
+ * Adjust PR points
+ * @route PATCH /api/admin/prs/:id/points
+ */
+export const adjustPRPoints = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { points, reason } = req.body;
+
+    if (typeof points !== 'number' || points < 0 || !reason) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Valid points (>=0) and reason are required')
+      );
+    }
+
+    const pr = await PullRequest.findById(id)
+      .populate('contributor', 'username totalPoints');
+
+    if (!pr) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Pull request not found')
+      );
+    }
+
+    const oldPoints = pr.pointsAwarded;
+    const pointsDiff = points - oldPoints;
+
+    // Update PR points
+    pr.pointsAwarded = points;
+    await pr.save();
+
+    // Update contributor total points
+    const contributor = pr.contributor;
+    contributor.totalPoints = Math.max(0, contributor.totalPoints + pointsDiff);
+    await contributor.save();
+
+    logger.warn(`Admin ${req.user.username} adjusted PR #${pr.prNumber} points from ${oldPoints} to ${points}. Contributor ${contributor.username} points changed by ${pointsDiff}. Reason: ${reason}`);
+
+    res.json(successResponse(
+      { 
+        pr: { 
+          id: pr._id, 
+          prNumber: pr.prNumber, 
+          oldPoints, 
+          newPoints: points,
+          change: pointsDiff
+        } 
+      },
+      'PR points adjusted successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error adjusting PR points:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to adjust PR points')
+    );
+  }
+};
+
+/**
+ * Add admin note to PR
+ * @route PATCH /api/admin/prs/:id/note
+ */
+export const addPRNote = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { note } = req.body;
+
+    if (!note || note.trim().length === 0) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('Note cannot be empty')
+      );
+    }
+
+    const pr = await PullRequest.findByIdAndUpdate(
+      id,
+      { adminNote: note },
+      { new: true }
+    );
+
+    if (!pr) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Pull request not found')
+      );
+    }
+
+    logger.info(`Admin ${req.user.username} added note to PR #${pr.prNumber}`);
+
+    res.json(successResponse(
+      { pr: { id: pr._id, prNumber: pr.prNumber, adminNote: pr.adminNote } },
+      'Admin note added successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error adding PR note:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to add admin note')
+    );
+  }
+};
+
+// ==================== LEADERBOARD & POINTS CONTROL ====================
+
+/**
+ * Get leaderboard data (all or by track)
+ * @route GET /api/admin/leaderboard
+ */
+export const getLeaderboard = async (req, res) => {
+  try {
+    const { track, limit = 100 } = req.query;
+
+    const filter = { role: 'Contributor', isActive: true };
+    if (track) filter.track = track;
+
+    const leaderboard = await User.find(filter)
+      .select('username fullName avatar_url totalPoints track college')
+      .sort({ totalPoints: -1 })
+      .limit(parseInt(limit))
+      .lean();
+
+    // Add rank
+    const rankedLeaderboard = leaderboard.map((user, index) => ({
+      ...user,
+      rank: index + 1
+    }));
+
+    res.json(successResponse(
+      { leaderboard: rankedLeaderboard, total: leaderboard.length },
+      'Leaderboard fetched successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error fetching leaderboard:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch leaderboard')
+    );
+  }
+};
+
+/**
+ * Recalculate all user points (based on merged PRs)
+ * @route POST /api/admin/points/recalculate
+ */
+export const recalculatePoints = async (req, res) => {
+  try {
+    const users = await User.find({ role: 'Contributor' });
+
+    let updatedCount = 0;
+    for (const user of users) {
+      const prs = await PullRequest.find({ 
+        contributor: user._id, 
+        status: 'Merged' 
+      });
+
+      const totalPoints = prs.reduce((sum, pr) => sum + (pr.pointsAwarded || 0), 0);
+      
+      if (user.totalPoints !== totalPoints) {
+        user.totalPoints = totalPoints;
+        await user.save();
+        updatedCount++;
+      }
+    }
+
+    logger.warn(`Admin ${req.user.username} recalculated points for ${updatedCount} users`);
+
+    res.json(successResponse(
+      { usersUpdated: updatedCount },
+      'Points recalculated successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error recalculating points:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to recalculate points')
+    );
+  }
+};
+
+// ==================== BADGES & CERTIFICATES ====================
+
+/**
+ * Get all badges with assignment count
+ * @route GET /api/admin/badges
+ */
+export const getAllBadges = async (req, res) => {
+  try {
+    const badges = await Badge.find().lean();
+
+    // Count how many users have each badge
+    const badgesWithCounts = await Promise.all(
+      badges.map(async (badge) => {
+        const count = await User.countDocuments({ badges: badge._id });
+        return { ...badge, assignedCount: count };
+      })
+    );
+
+    res.json(successResponse(
+      { badges: badgesWithCounts },
+      'Badges fetched successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error fetching badges:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to fetch badges')
+    );
+  }
+};
+
+/**
+ * Manually assign badge to user
+ * @route POST /api/admin/badges/assign
+ */
+export const assignBadge = async (req, res) => {
+  try {
+    const { userId, badgeId, reason } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('User not found')
+      );
+    }
+
+    const badge = await Badge.findById(badgeId);
+    if (!badge) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json(
+        errorResponse('Badge not found')
+      );
+    }
+
+    // Check if user already has this badge
+    if (user.badges.includes(badgeId)) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json(
+        errorResponse('User already has this badge')
+      );
+    }
+
+    user.badges.push(badgeId);
+    await user.save();
+
+    logger.info(`Admin ${req.user.username} assigned badge "${badge.name}" to ${user.username}. Reason: ${reason || 'N/A'}`);
+
+    res.json(successResponse(
+      { user: { username: user.username }, badge: { name: badge.name } },
+      'Badge assigned successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error assigning badge:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to assign badge')
+    );
+  }
+};
+
+// ==================== EXPORTS & REPORTS ====================
+
+/**
+ * Export users list as CSV data
+ * @route GET /api/admin/export/users
+ */
+export const exportUsers = async (req, res) => {
+  try {
+    const { role, track } = req.query;
+
+    const filter = {};
+    if (role) filter.role = role;
+    if (track) filter.track = track;
+
+    const users = await User.find(filter)
+      .select('username fullName email github_id role track college totalPoints isActive createdAt')
+      .lean();
+
+    res.json(successResponse(
+      { users, count: users.length },
+      'Users data exported successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error exporting users:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to export users')
+    );
+  }
+};
+
+/**
+ * Export PRs data
+ * @route GET /api/admin/export/prs
+ */
+export const exportPRs = async (req, res) => {
+  try {
+    const prs = await PullRequest.find()
+      .populate('contributor', 'username fullName')
+      .populate('project', 'name')
+      .select('prNumber title prLink status pointsAwarded mergedAt createdAt')
+      .lean();
+
+    res.json(successResponse(
+      { prs, count: prs.length },
+      'PRs data exported successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error exporting PRs:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to export PRs')
+    );
+  }
+};
+
+/**
+ * Export leaderboard snapshot
+ * @route GET /api/admin/export/leaderboard
+ */
+export const exportLeaderboard = async (req, res) => {
+  try {
+    const { track } = req.query;
+
+    const filter = { role: 'Contributor', isActive: true };
+    if (track) filter.track = track;
+
+    const leaderboard = await User.find(filter)
+      .select('username fullName email totalPoints track college')
+      .sort({ totalPoints: -1 })
+      .lean();
+
+    const rankedLeaderboard = leaderboard.map((user, index) => ({
+      rank: index + 1,
+      ...user
+    }));
+
+    res.json(successResponse(
+      { leaderboard: rankedLeaderboard, count: rankedLeaderboard.length },
+      'Leaderboard exported successfully'
+    ));
+
+  } catch (error) {
+    logger.error('Error exporting leaderboard:', error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json(
+      errorResponse('Failed to export leaderboard')
+    );
+  }
+};

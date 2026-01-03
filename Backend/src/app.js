@@ -14,6 +14,7 @@ import pullRequestRoutes from './routes/pullRequest.routes.js';
 import badgeRoutes from './routes/badge.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.use(`/api/${API_VERSION}/projects`, projectRoutes);
 app.use(`/api/${API_VERSION}/pull-requests`, pullRequestRoutes);
 app.use(`/api/${API_VERSION}/badges`, badgeRoutes);
 app.use(`/api/${API_VERSION}/contact`, contactRoutes);
+app.use(`/api/${API_VERSION}/admin`, adminRoutes);
 
 // 404 handler
 app.use(notFound);
