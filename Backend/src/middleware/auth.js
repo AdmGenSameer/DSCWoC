@@ -156,3 +156,47 @@ export const optionalAuth = async (req, res, next) => {
   }
 };
 
+/**
+ * Middleware to ensure only Admin users can access
+ * Extra security: checks both role and optionally GitHub ID
+ */
+export const requireAdmin = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        status: 'error',
+        message: 'Authentication required',
+      });
+    }
+
+    // Testing phase: Only allow specific GitHub usernames
+    const ALLOWED_ADMIN_USERNAMES = ['AdmGenSameer', 'samstark1'];
+    
+    if (!ALLOWED_ADMIN_USERNAMES.includes(req.user.username)) {
+      logger.warn(`Unauthorized admin access attempt by user: ${req.user.username}`);
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        status: 'error',
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    // Check if user has Admin role
+    if (req.user.role !== 'Admin') {
+      logger.warn(`User ${req.user.username} has correct username but not Admin role`);
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        status: 'error',
+        message: 'Access denied. Admin privileges required.',
+      });
+    }
+
+    logger.info(`Admin access granted to: ${req.user.username}`);
+    next();
+  } catch (error) {
+    logger.error('Admin authorization error:', error);
+    return res.status(HTTP_STATUS.FORBIDDEN).json({
+      status: 'error',
+      message: 'Authorization failed',
+    });
+  }
+};
+
