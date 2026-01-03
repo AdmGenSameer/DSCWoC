@@ -42,10 +42,21 @@ const Navbar = () => {
     if (item.isRoute) {
       navigate(item.href);
     } else {
-      // Smooth scroll to section
+      // For hash links, check if element exists on current page
       const element = document.querySelector(item.href);
       if (element) {
+        // Element exists on current page, scroll to it
         element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Element doesn't exist on current page (e.g., scrolling to #timeline from /about)
+        // Navigate to home first, then scroll
+        navigate('/');
+        setTimeout(() => {
+          const targetElement = document.querySelector(item.href);
+          if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 100); // Small delay to ensure page loads
       }
     }
     setMobileMenuOpen(false);
