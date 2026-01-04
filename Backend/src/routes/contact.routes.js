@@ -1,14 +1,24 @@
 import express from 'express';
-import { asyncHandler } from '../middleware/errorHandler.js';
-import * as contactController from '../controllers/contact.controller.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
+import {
+  submitContact,
+  getAllContacts,
+  updateContactStatus,
+  deleteContact,
+  getContactStats
+} from '../controllers/contact.controller.js';
 
 const router = express.Router();
 
-/**
- * @desc    Submit contact form
- * @route   POST /api/v1/contact
- * @access  Public
- */
-router.post('/', asyncHandler(contactController.submitContactForm));
+// Public route - submit contact form
+router.post('/submit', submitContact);
+
+// Admin routes - require authentication + admin role
+router.use(authenticate, requireAdmin);
+
+router.get('/', getAllContacts);
+router.get('/stats', getContactStats);
+router.patch('/:id/status', updateContactStatus);
+router.delete('/:id', deleteContact);
 
 export default router;

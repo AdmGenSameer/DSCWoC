@@ -2,6 +2,7 @@ import User from '../models/User.model.js';
 import Project from '../models/Project.model.js';
 import PullRequest from '../models/PullRequest.model.js';
 import Badge from '../models/Badge.model.js';
+import Contact from '../models/Contact.model.js';
 import { HTTP_STATUS } from '../config/constants.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 import logger from '../utils/logger.js';
@@ -40,6 +41,11 @@ export const getOverview = async (req, res) => {
       { $group: { _id: null, total: { $sum: '$badgeCount' } } }
     ]);
     const badgesIssued = totalBadgesIssued[0]?.total || 0;
+
+    // Contact messages stats
+    const totalContacts = await Contact.countDocuments();
+    const newContacts = await Contact.countDocuments({ status: 'New' });
+    const respondedContacts = await Contact.countDocuments({ status: 'Responded' });
 
     // Recent activity (last 30 days)
     const thirtyDaysAgo = new Date();
@@ -82,7 +88,10 @@ export const getOverview = async (req, res) => {
         mergedPRs,
         pendingPRs,
         totalPointsDistributed,
-        badgesIssued
+        badgesIssued,
+        totalContacts,
+        newContacts,
+        respondedContacts
       },
       charts: {
         prsPerDay
@@ -90,7 +99,8 @@ export const getOverview = async (req, res) => {
       topContributors,
       alerts: {
         pendingPRs,
-        inactiveProjects
+        inactiveProjects,
+        newContacts
       }
     }, 'Admin overview fetched successfully'));
 
