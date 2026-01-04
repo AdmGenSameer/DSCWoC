@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import AboutSection from './components/AboutSection';
+import SpaceLoader from './components/SpaceLoader';
 import BenefitsSection from './components/BenefitsSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
@@ -30,16 +31,42 @@ const AnimationFallback = () => (
 
 // Home component
 const Home = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Minimum loading time for smooth UX
+    const minLoadTime = 1500; // 1.5 seconds
+    const startTime = Date.now();
+
+    const handleLoad = () => {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, minLoadTime - elapsed);
+      
+      setTimeout(() => {
+        setIsLoading(false);
+      }, remaining);
+    };
+
+    // Wait for all assets to load
+    if (document.readyState === 'complete') {
+      handleLoad();
+    } else {
+      window.addEventListener('load', handleLoad);
+      return () => window.removeEventListener('load', handleLoad);
+    }
+  }, []);
   const { ref: rewardsRef, hasBeenVisible: rewardsVisible } = useIntersectionObserver();
   const { ref: benefitsRef, hasBeenVisible: benefitsVisible } = useIntersectionObserver();
   const { ref: ctaRef, hasBeenVisible: ctaVisible } = useIntersectionObserver();
 
   return (
-    <div className="relative w-screen overflow-x-hidden">
-      {/* Starfield Background - Lazy loaded */}
-      <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
-        <Starfield />
-      </Suspense>
+    <>
+      <SpaceLoader isLoading={isLoading} />
+      <div className="relative w-screen overflow-x-hidden" style={{ opacity: isLoading ? 0 : 1, transition: 'opacity 0.5s ease-in' }}>
+        {/* Starfield Background - Lazy loaded */}
+        <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
+          <Starfield />
+        </Suspense>
 
       {/* Content */}
       <div className="relative z-10 w-full">
@@ -76,6 +103,7 @@ const Home = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
