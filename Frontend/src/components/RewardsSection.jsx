@@ -306,8 +306,7 @@ const RewardsSection = () => {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* MOBILE VIEW */}
-        {isMobile ? (
+        {!mounted ? null : isMobile ? (
           <>
             {/* Mobile Header */}
             <div className="text-center mb-12">
