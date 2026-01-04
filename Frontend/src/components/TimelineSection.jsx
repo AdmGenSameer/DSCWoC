@@ -101,7 +101,7 @@ const TimelineSection = () => {
 
     const pathLength = path.getTotalLength();
 
-    // Animate planets on scroll
+    // Animate planets on scroll - OPTIMIZED
     planetRefs.current.forEach((planet, index) => {
       if (planet) {
         gsap.fromTo(
@@ -112,21 +112,24 @@ const TimelineSection = () => {
             opacity: 1,
             rotationY: 0,
             duration: 1,
+            force3D: true, // Enable GPU acceleration
             scrollTrigger: {
               trigger: planet,
               start: 'top 80%',
               end: 'top 50%',
-              scrub: 1,
+              scrub: 0.5, // Reduced from 1 for better performance (slight delay ok)
+              once: true, // Only animate once to save performance
             },
           }
         );
 
-        // Continuous planet rotation
+        // Continuous planet rotation - OPTIMIZED
         gsap.to(planet, {
           rotationZ: 360,
           duration: 20 + index * 5,
           repeat: -1,
           ease: 'none',
+          force3D: true, // Enable hardware acceleration
         });
       }
     });
@@ -361,6 +364,7 @@ const TimelineSection = () => {
           width: `${size}px`,
           height: `${size}px`,
           transformStyle: 'preserve-3d',
+          willChange: 'transform, opacity', // GPU optimization for animations
         }}
       >
         {/* Planet sphere */}
