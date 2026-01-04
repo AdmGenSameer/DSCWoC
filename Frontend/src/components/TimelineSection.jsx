@@ -151,6 +151,7 @@ const TimelineSection = () => {
             x: point.x,
             y: point.y,
             rotation: angle + 90,
+            force3D: true,
           });
 
           const speed = Math.abs(nextPoint.y - point.y) + Math.abs(nextPoint.x - point.x);

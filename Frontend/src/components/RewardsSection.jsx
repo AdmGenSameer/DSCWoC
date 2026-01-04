@@ -200,57 +200,63 @@ const RewardsSection = () => {
       });
     }
 
-    // Animate prize pool
+    // Animate prize pool - OPTIMIZED
     if (prizePoolRef.current) {
       gsap.from(prizePoolRef.current, {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top 70%',
-          toggleActions: 'play none none reverse',
+          toggleActions: 'play none none none', // Removed reverse to reduce animations
+          once: true, // Only animate once
         },
         opacity: 0,
         scale: 0.9,
         duration: 0.8,
         delay: 0.2,
+        force3D: true,
       });
     }
 
-    // Animate reward items
+    // Animate reward items - OPTIMIZED
     rewardItemsRef.current.forEach((item, index) => {
       if (item) {
         gsap.from(item, {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 70%',
-            toggleActions: 'play none none reverse',
+            toggleActions: 'play none none none', // Removed reverse
+            once: true, // Only animate once
           },
           opacity: 0,
           x: -30,
           duration: 0.6,
           delay: 0.3 + index * 0.1,
+          force3D: true,
         });
       }
     });
 
-    // Animate tier cards
+    // Animate tier cards - OPTIMIZED
     tiers.current.forEach((tier, index) => {
       if (tier) {
         gsap.from(tier, {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 55%',
-            toggleActions: 'play none none reverse',
+            toggleActions: 'play none none none', // Removed reverse
+            once: true, // Only animate once
           },
           opacity: 0,
           y: 40,
           duration: 0.8,
           delay: 0.4 + index * 0.15,
           force3D: true,
+          force3D: true,
         });
       }
     });
 
-    // Animate progress bar
+    // Animate progress bar - OPTIMIZED
     if (progressBarRef.current) {
       const fills = progressBarRef.current.querySelectorAll('.progress-fill');
       fills.forEach((fill, index) => {
@@ -259,13 +265,15 @@ const RewardsSection = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 75%',
-            toggleActions: 'play none none reverse',
+            toggleActions: 'play none none none', // Removed reverse
+            once: true, // Only animate once
           },
           scaleX: 0,
           opacity: 0,
           duration: 0.8,
           delay: 0.1 + index * 0.2,
           transformOrigin: 'left center',
+          force3D: true,
         });
       });
     }
