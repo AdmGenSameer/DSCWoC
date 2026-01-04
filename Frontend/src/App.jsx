@@ -2,15 +2,16 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import AboutSection from './components/AboutSection';
-import RewardsSection from './components/RewardsSection';
 import BenefitsSection from './components/BenefitsSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
+import { useIntersectionObserver } from './hooks/useIntersectionObserver';
 
 // Lazy load heavy animation components
 const Starfield = lazy(() => import('./components/Starfield'));
 const HeroSection = lazy(() => import('./components/HeroSection'));
 const TimelineSection = lazy(() => import('./components/TimelineSection'));
+const RewardsSection = lazy(() => import('./components/RewardsSection'));
 
 // Pages
 import Login from './pages/Login';
@@ -28,32 +29,55 @@ const AnimationFallback = () => (
 );
 
 // Home component
-const Home = () => (
-  <div className="relative w-screen overflow-x-hidden">
-    {/* Starfield Background - Lazy loaded */}
-    <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
-      <Starfield />
-    </Suspense>
+const Home = () => {
+  const { ref: rewardsRef, hasBeenVisible: rewardsVisible } = useIntersectionObserver();
+  const { ref: benefitsRef, hasBeenVisible: benefitsVisible } = useIntersectionObserver();
+  const { ref: ctaRef, hasBeenVisible: ctaVisible } = useIntersectionObserver();
 
-    {/* Content */}
-    <div className="relative z-10 w-full">
-      <Navbar />
-      <div className="pt-16 sm:pt-20">
-        <Suspense fallback={<AnimationFallback />}>
-          <HeroSection />
-        </Suspense>
-        <AboutSection />
-        <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
-          <TimelineSection />
-        </Suspense>
-        <RewardsSection />
-        <BenefitsSection />
-        <CTASection />
-        <Footer />
+  return (
+    <div className="relative w-screen overflow-x-hidden">
+      {/* Starfield Background - Lazy loaded */}
+      <Suspense fallback={<div className="fixed inset-0 bg-slate-950" />}>
+        <Starfield />
+      </Suspense>
+
+      {/* Content */}
+      <div className="relative z-10 w-full">
+        <Navbar />
+        <div className="pt-16 sm:pt-20">
+          <Suspense fallback={<div className="w-full h-screen bg-gradient-to-b from-slate-900 to-slate-950 animate-pulse" />}>
+            <HeroSection />
+          </Suspense>
+          <AboutSection />
+          <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
+            <TimelineSection />
+          </Suspense>
+
+          {/* Rewards Section - Lazy loaded with intersection observer */}
+          <div ref={rewardsRef}>
+            {rewardsVisible && (
+              <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-950 via-indigo-950/30 to-slate-950" />}>
+                <RewardsSection />
+              </Suspense>
+            )}
+          </div>
+
+          {/* Benefits Section - Lazy loaded with intersection observer */}
+          <div ref={benefitsRef}>
+            {benefitsVisible && <BenefitsSection />}
+          </div>
+
+          {/* CTA Section - Lazy loaded with intersection observer */}
+          <div ref={ctaRef}>
+            {ctaVisible && <CTASection />}
+          </div>
+
+          <Footer />
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 function App() {
   return (

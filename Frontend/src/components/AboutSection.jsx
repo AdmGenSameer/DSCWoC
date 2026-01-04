@@ -210,7 +210,7 @@ const AboutSection = () => {
                 <div className="scanline"></div>
                 
                 {/* Screen glow */}
-                <div className="absolute inset-0 bg-gradient-to-b from-cosmic-purple/10 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-cosmic-purple/40 to-transparent pointer-events-none"></div>
                 
                 {/* Terminal header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-cosmic-purple/30">
