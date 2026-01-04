@@ -159,6 +159,7 @@ const RewardsSection = () => {
   ];
 
   useEffect(() => {
+    // Desktop animations only
     if (isMobile) return;
 
     // Set initial states for all animated elements
@@ -294,11 +295,117 @@ const RewardsSection = () => {
         <div className="absolute bottom-1/3 right-1/5 w-2 h-2 bg-indigo-300/50 rounded-full animate-pulse" style={{ animationDelay: '0.8s' }} />
         
         {/* Orbital rings */}
-        <div className="absolute top-1/3 right-20 w-32 h-32 border border-purple-500/20 rounded-full" style={{ transform: 'rotate(45deg)' }} />
-        <div className="absolute bottom-1/4 left-20 w-40 h-40 border border-blue-500/15 rounded-full" style={{ transform: 'rotate(-30deg)' }} />
+        <div className="absolute top-1/3 right-20 w-32 h-32 border border-purple-500/20 rounded-full hidden sm:block" style={{ transform: 'rotate(45deg)' }} />
+        <div className="absolute bottom-1/4 left-20 w-40 h-40 border border-blue-500/15 rounded-full hidden sm:block" style={{ transform: 'rotate(-30deg)' }} />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
+        {/* MOBILE VIEW */}
+        {isMobile ? (
+          <>
+            {/* Mobile Header */}
+            <div className="text-center mb-12">
+              <div className="flex justify-center items-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-purple-400 animate-pulse" />
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent">
+                  Cosmic Rewards
+                </h2>
+                <Sparkles className="w-6 h-6 text-blue-400 animate-pulse" />
+              </div>
+              <p className="text-sm text-gray-300 mb-3">Journey through our reward galaxy</p>
+              <p className="text-xs text-gray-400 mb-4">
+                Every contribution creates ripples in our open source universe
+              </p>
+            </div>
+
+            {/* Mobile Prize Pool */}
+            <div className="relative bg-gradient-to-r from-indigo-900/40 via-purple-900/40 to-pink-900/40 border-2 border-purple-500/50 rounded-lg p-4 text-center mb-8 backdrop-blur-sm">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Orbit className="w-5 h-5 text-yellow-400 animate-spin" style={{ animationDuration: '20s' }} />
+                <h3 className="text-lg font-bold text-white">Prize Pool</h3>
+                <Orbit className="w-5 h-5 text-pink-400 animate-spin" style={{ animationDuration: '20s', animationDirection: 'reverse' }} />
+              </div>
+              <p className="text-xl font-bold bg-gradient-to-r from-yellow-300 to-purple-300 bg-clip-text text-transparent">
+                ₹ 50,000+
+              </p>
+              <p className="text-xs text-gray-300 mt-2">in cosmic rewards</p>
+            </div>
+
+            {/* Mobile Reward Types - 3 column grid */}
+            <div className="mb-8">
+              <h3 className="text-sm font-bold text-yellow-400 mb-4 text-center">Reward Types</h3>
+              <div className="flex flex-wrap justify-center gap-3">
+                {rewardTypes.map((reward, index) => (
+                  <div
+                    key={index}
+                    className="bg-gradient-to-br from-white/5 to-white/10 border border-white/20 rounded-lg p-3 text-center transition-all active:scale-95 w-40 min-h-32 flex flex-col items-center justify-center"
+                  >
+                    <reward.icon className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                    <p className="text-xs text-white font-semibold line-clamp-2">{reward.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile Tiers - Full height cards with all rewards */}
+            <div className="mb-8">
+              <h3 className="text-sm font-bold text-yellow-400 mb-4 text-center">Achievement Tiers</h3>
+              <div className="space-y-4">
+                {leaderboardTiers.map((tier, index) => (
+                  <div
+                    key={index}
+                    className={`rounded-lg p-4 backdrop-blur-sm border transition-all ${
+                      tier.isGold
+                        ? 'bg-yellow-900/30 border-yellow-400/50'
+                        : tier.isSilver
+                        ? 'bg-slate-800/30 border-slate-400/50'
+                        : 'bg-orange-900/30 border-orange-400/50'
+                    }`}
+                  >
+                    {/* Tier header */}
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b" style={{
+                      borderColor: tier.isGold ? 'rgba(250, 204, 21, 0.3)' : tier.isSilver ? 'rgba(100, 116, 139, 0.3)' : 'rgba(234, 88, 12, 0.3)'
+                    }}>
+                      <div className="flex items-center gap-2">
+                        <tier.rankIcon className={`w-5 h-5 ${
+                          tier.isGold ? 'text-yellow-300' : tier.isSilver ? 'text-slate-300' : 'text-orange-300'
+                        }`} />
+                        <div>
+                          <p className={`text-xs font-bold ${
+                            tier.isGold ? 'text-yellow-200' : tier.isSilver ? 'text-slate-200' : 'text-orange-200'
+                          }`}>
+                            {tier.rank}
+                          </p>
+                          <p className="text-sm font-bold text-white">{tier.title}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* All Tier rewards */}
+                    <div className="space-y-2 text-xs">
+                      {tier.rewards.map((reward, rewardIndex) => (
+                        <div key={rewardIndex} className="flex items-start gap-2 text-gray-300">
+                          <reward.icon className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                          <span>{reward.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mobile footer message */}
+            <div className="text-center">
+              <p className="text-sm text-gray-300 mb-2">
+                <Rocket className="w-4 h-4 inline text-purple-400 mr-1" />
+                Every contribution lights up the cosmos
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* DESKTOP VIEW */}
         {/* Header with cosmic theme */}
         <div className="text-center mb-16">
           <div className="flex justify-center items-center gap-4 mb-6">
@@ -575,6 +682,8 @@ const RewardsSection = () => {
             <Sparkles className="w-4 h-4 text-blue-400" />
           </p>
         </div>
+          </>
+        )}
       </div>
     </section>
   );
