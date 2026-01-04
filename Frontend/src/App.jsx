@@ -16,6 +16,7 @@ const TimelineSection = lazy(() => import('./components/TimelineSection'));
 import Login from './pages/Login';
 import AuthCallback from './pages/AuthCallback';
 import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 import About from './pages/About';
