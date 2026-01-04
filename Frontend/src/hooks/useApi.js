@@ -114,7 +114,8 @@ export const useBadges = () => {
 export const useSubmitContact = () => {
   return useMutation({
     mutationFn: async (formData) => {
-      const response = await fetch(`${API_BASE_URL}/v1/contact/submit`, {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/v1/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -122,12 +123,13 @@ export const useSubmitContact = () => {
         body: JSON.stringify(formData),
       });
       
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to send message');
+      const result = await response.json();
+      
+      if (result.status !== 'success') {
+        throw new Error(result.message || 'Failed to send message');
       }
       
-      return response.json();
+      return result;
     },
   });
 };
