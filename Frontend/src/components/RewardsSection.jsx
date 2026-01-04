@@ -251,6 +251,7 @@ const RewardsSection = () => {
           duration: 0.8,
           delay: 0.4 + index * 0.15,
           force3D: true,
+          force3D: true,
         });
       }
     });
