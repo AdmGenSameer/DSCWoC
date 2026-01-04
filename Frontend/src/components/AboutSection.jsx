@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -41,13 +41,14 @@ const AboutSection = () => {
     '> AWAITING CREW REGISTRATION...',
   ];
 
-  // Typing effect function (desktop only)
-  const startTyping = () => {
+  // Typing effect function (desktop only) - optimized
+  const startTyping = useCallback(() => {
     let lineIndex = 0;
     let charIndex = 0;
     let fullText = '';
+    let intervalId = null;
 
-    const typeInterval = setInterval(() => {
+    const typeInterval = () => {
       if (lineIndex < terminalLines.length) {
         if (charIndex < terminalLines[lineIndex].length) {
           fullText += terminalLines[lineIndex][charIndex];
@@ -60,11 +61,17 @@ const AboutSection = () => {
           charIndex = 0;
           setCurrentLine(lineIndex);
         }
-      } else {
-        clearInterval(typeInterval);
+        // Increased interval from 30ms to 50ms for better performance
+        intervalId = setTimeout(typeInterval, 50);
       }
-    }, 30);
-  };
+    };
+
+    typeInterval();
+
+    return () => {
+      if (intervalId) clearTimeout(intervalId);
+    };
+  }, [terminalLines]);
 
   useEffect(() => {
     const terminal = terminalRef.current;
@@ -91,6 +98,7 @@ const AboutSection = () => {
           scrollTrigger: {
             trigger: computer,
             start: 'top 80%',
+            once: true,
             onEnter: () => {
               // Start typing effect when terminal comes into view
               startTyping();
@@ -210,7 +218,7 @@ const AboutSection = () => {
                 <div className="scanline"></div>
                 
                 {/* Screen glow */}
-                <div className="absolute inset-0 bg-gradient-to-b from-cosmic-purple/10 to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 bg-gradient-to-b from-cosmic-purple/40 to-transparent pointer-events-none"></div>
                 
                 {/* Terminal header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-cosmic-purple/30">
