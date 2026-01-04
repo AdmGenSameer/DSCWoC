@@ -192,7 +192,6 @@ const Admin = () => {
               { id: 'users', label: 'Users', icon: Users },
               { id: 'projects', label: 'Projects', icon: FolderGit2 },
               { id: 'prs', label: 'Pull Requests', icon: GitPullRequest },
-              { id: 'contacts', label: 'Messages', icon: Mail },
             ].map((tab) => (
               <button
                 key={tab.id}

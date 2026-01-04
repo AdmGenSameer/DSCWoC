@@ -62,7 +62,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<Dashboard />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/mentor/dashboard" element={<Dashboard />} />
         <Route path="/about" element={<About />} />
         <Route path="/rewards" element={<Rewards />} />
