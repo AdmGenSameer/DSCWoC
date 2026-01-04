@@ -1,7 +1,8 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import Navbar from './components/Navbar';
 import AboutSection from './components/AboutSection';
+import RewardsSection from './components/RewardsSection';
 import BenefitsSection from './components/BenefitsSection';
 import CTASection from './components/CTASection';
 import Footer from './components/Footer';
@@ -19,8 +20,6 @@ import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 import About from './pages/About';
 import Rewards from './pages/Rewards';
-import Projects from './pages/Projects';
-import Admin from './pages/Admin';
 
 // Loading fallback component
 const AnimationFallback = () => (
@@ -46,6 +45,7 @@ const Home = () => (
         <Suspense fallback={<div className="h-screen bg-gradient-to-b from-slate-900 to-slate-950" />}>
           <TimelineSection />
         </Suspense>
+        <RewardsSection />
         <BenefitsSection />
         <CTASection />
         <Footer />
@@ -54,30 +54,17 @@ const Home = () => (
   </div>
 );
 
-// ScrollToTop component to handle scroll on route change
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
-
 function App() {
   return (
     <Router>
-      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<Dashboard />} />
         <Route path="/mentor/dashboard" element={<Dashboard />} />
         <Route path="/about" element={<About />} />
-        <Route path="/projects" element={<Projects />} />
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/faq" element={<FAQ />} />
