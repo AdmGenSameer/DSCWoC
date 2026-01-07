@@ -5,11 +5,11 @@ export const currentUser = {
   name: "Alex Chen", //
   githubUsername: "alexcodes", //
   avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex", //
-  college: "MIT",
-  role: "contributor",
-  totalPRs: 24,
-  mergedPRs: 18,
-  totalPoints: 2450,
+  college: "MIT", //
+  role: "contributor", //
+  totalPRs: 24, //
+  mergedPRs: 18, //
+  totalPoints: 2450, //
 };
 
 // User's joined projects

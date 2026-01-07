@@ -1,5 +1,5 @@
 import { Award } from "lucide-react";
-import { format } from "date-fns";
+import { useRef, useState } from "react";
 
 const rarityStyles = {
   common: {
@@ -12,21 +12,21 @@ const rarityStyles = {
   rare: {
     border: "border-star-blue/50",
     bg: "bg-star-blue/10",
-    glow: "hover:shadow-[0_0_20px_hsl(217_91%_60%/0.3)]",
+    glow: "",
     label: "Rare",
     labelColor: "text-star-blue",
   },
   epic: {
     border: "border-cosmic-purple/50",
     bg: "bg-cosmic-purple/10",
-    glow: "hover:shadow-[0_0_20px_hsl(256_100%_68%/0.3)]",
+    glow: "",
     label: "Epic",
     labelColor: "text-cosmic-purple",
   },
   legendary: {
     border: "border-supernova-orange/50",
     bg: "bg-supernova-orange/10",
-    glow: "hover:shadow-[0_0_25px_hsl(25_95%_53%/0.4)] animate-glow",
+    glow: "",
     label: "Legendary",
     labelColor: "text-supernova-orange",
   },
@@ -61,6 +61,50 @@ function EmptyState() {
 }
 
 export function BadgesSection({ badges, isLoading }) {
+  const scrollRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleTouchStart = (e) => {
+    setIsDragging(true);
+    setStartX(e.touches[0].pageX - scrollRef.current.offsetLeft);
+    setScrollLeft(scrollRef.current.scrollLeft);
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const x = e.touches[0].pageX - scrollRef.current.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    scrollRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -68,7 +112,7 @@ export function BadgesSection({ badges, isLoading }) {
           <Award className="w-5 h-5 text-primary" />
           Badges
         </h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="flex gap-4 overflow-hidden">
           {[1, 2, 3, 4].map((i) => (
             <BadgeSkeleton key={i} />
           ))}
@@ -89,6 +133,9 @@ export function BadgesSection({ badges, isLoading }) {
     );
   }
 
+  const rarityOrder = { legendary: 0, epic: 1, rare: 2, common: 3 };
+  const sortedBadges = [...badges].sort((a, b) => rarityOrder[a.rarity] - rarityOrder[b.rarity]);
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
@@ -97,35 +144,45 @@ export function BadgesSection({ badges, isLoading }) {
         <span className="text-sm font-normal text-muted-foreground">({badges.length})</span>
       </h2>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {badges.map((badge) => {
+      <div
+        ref={scrollRef}
+        className={`flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] ${
+          isDragging ? "cursor-grabbing select-none" : "cursor-grab"
+        }`}
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
+      >
+        {sortedBadges.map((badge) => {
           const rarity = rarityStyles[badge.rarity];
-          
+
           return (
             <div
               key={badge.id}
-              className={`glass-card p-4 border ${rarity.border} ${rarity.glow} transition-all duration-300 group cursor-default`}
+              className={`glass-card p-4 border ${rarity.border} flex-shrink-0 w-[160px] md:w-[200px] hover:transition-transform hover:border-nebula-pink`}
             >
               <div className="flex flex-col items-center text-center">
-                <div className={`w-14 h-14 rounded-xl ${rarity.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-                  <span className="text-3xl">{badge.icon}</span>
+                <div
+                  className={`w-12 h-12 md:w-14 md:h-14 rounded-xl ${rarity.bg} flex items-center justify-center mb-3`}
+                >
+                  <span className="text-2xl md:text-3xl">{badge.icon}</span>
                 </div>
-                
-                <h3 className="font-semibold text-foreground text-sm mb-1">
+
+                <h3 className="font-semibold text-foreground text-xs md:text-sm mb-1">
                   {badge.name}
                 </h3>
-                
+
                 <span className={`text-xs font-medium ${rarity.labelColor} mb-2`}>
                   {rarity.label}
                 </span>
-                
+
                 <p className="text-xs text-muted-foreground line-clamp-2 mb-2">
                   {badge.description}
                 </p>
-                
-                <span className="text-xs text-muted-foreground/70">
-                  {format(new Date(badge.earnedAt), "MMM d, yyyy")}
-                </span>
               </div>
             </div>
           );

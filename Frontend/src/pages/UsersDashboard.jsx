@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+
+import Starfield from "../components/Starfield.jsx";
 import { DashboardHeader } from "../components/usersDashboard/DashboardHeader.jsx";
 import { ProfileSection } from "../components/usersDashboard/ProfileSection.jsx";
 import { StatsOverview } from "../components/usersDashboard/StatsOverview.jsx";
@@ -8,109 +10,168 @@ import { PullRequestsTable } from "../components/usersDashboard/PullRequestsTabl
 import { BadgesSection } from "../components/usersDashboard/BadgesSection.jsx";
 import { LeaderboardPreview } from "../components/usersDashboard/LeaderboardPreview.jsx";
 import { EventCountdown } from "../components/usersDashboard/EventCountdown.jsx";
-import Starfield from "../components/Starfield.jsx";
+
 import {
   currentUser,
   userProjects,
   userPullRequests,
-  userBadges,
   leaderboard,
   getUserRank,
   eventDates,
 } from "../data/mockData";
-function getInitialUser() {
-  const userData = localStorage.getItem('user');
-  const accessToken = localStorage.getItem('access_token');
 
-  if (userData && accessToken) {
-    try {
-      const parsedUser = JSON.parse(userData);
-      if (parsedUser && parsedUser.id && parsedUser.github_username) {
-        return parsedUser;
-      }
-    } catch (err) {
-      console.error('Error parsing user data:', err);
-    }
+import { useUserDashboardData } from "../hooks/useApi.js";
+
+/* -------------------------------- Utilities -------------------------------- */
+
+function getInitialUser() {
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem("access_token");
+    return user?.id && user?.github_username && token ? user : null;
+  } catch {
+    return null;
   }
-  return null;
 }
 
+/* -------------------------------- Component -------------------------------- */
+
 export default function Dashboard() {
-  const [user] = useState(getInitialUser);
-  const userRank = getUserRank(user?.id);
   const navigate = useNavigate();
+  const user = useMemo(getInitialUser, []);
+
+  const { data, isLoading, isError, error } = useUserDashboardData(Boolean(user));
+
+  const clearAuthAndRedirect = useCallback(() => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("access_token");
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
+  /* ----------------------------- Auth Handling ------------------------------ */
 
   useEffect(() => {
-    if (!user) {
-      // Clear invalid data and redirect to login
-      localStorage.removeItem('user');
-      localStorage.removeItem('access_token');
-      navigate('/login', { replace: true });
-    }
-  }, [user, navigate]);
+    if (!user) clearAuthAndRedirect();
+  }, [user, clearAuthAndRedirect]);
 
-  if (!user) {
+  useEffect(() => {
+    if (
+      isError &&
+      (error?.response?.status === 401 ||
+        error?.message?.toLowerCase().includes("unauthorized"))
+    ) {
+      clearAuthAndRedirect();
+    }
+  }, [isError, error, clearAuthAndRedirect]);
+
+  /* ------------------------------ Derived Data ------------------------------ */
+
+  const userRank = useMemo(() => getUserRank(user?.id), [user?.id]);
+
+  const profileUser = useMemo(() => {
+    const u = data?.data;
+    return {
+      id: u?.github_id ?? "user-001",
+      name: u?.fullName ?? "Anonymous",
+      githubUsername: u?.github_username ?? "unknown",
+      avatar:
+        u?.avatar_url ??
+        "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
+      college: u?.college ?? "VIT Bhopal",
+      role: u?.role ?? "contributor",
+      totalPRs: u?.stats?.totalPRs ?? 0,
+      mergedPRs: u?.stats?.mergedPRs ?? 0,
+      totalPoints: u?.stats?.points ?? 0,
+    };
+  }, [data]);
+
+  const badges = useMemo(
+    () =>
+      data?.data?.badges?.map((badge, index) => ({
+        id: badge._id || `badge-${index}`,
+        name: badge.name,
+        description: badge.description,
+        icon: badge.icon,
+        rarity: badge.rarity?.toLowerCase() || "common",
+      })) || [],
+    [data]
+  );
+
+  /* ------------------------------- UI States -------------------------------- */
+
+  if (!user || isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Starfield />
-        <div className="text-white">Loading...</div>
+        <span className="text-white">Loading dashboard...</span>
       </div>
     );
   }
 
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Starfield />
+        <span className="text-red-500">
+          {error?.message || "Failed to load dashboard"}
+        </span>
+      </div>
+    );
+  }
+
+  /* ---------------------------------- UI ----------------------------------- */
+
   return (
     <div className="min-h-screen bg-background">
       <Starfield />
-      <DashboardHeader avatar={user.avatar_url}/>
+
+      <DashboardHeader avatar={user.avatar_url} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8 animate-fade-in">
           {/* Event Countdown */}
-          <EventCountdown eventStartDate={eventDates.start} eventEndDate={eventDates.end} />
+          <EventCountdown
+            eventStartDate={eventDates.start}
+            eventEndDate={eventDates.end}
+          />
 
-          {/* Profile Section */}
+          {/* Profile */}
           <ProfileSection
-            user={currentUser}
+            user={profileUser}
             rank={userRank}
-            isLoading={false}
+            isLoading={isLoading}
           />
 
-          {/* Stats Overview */}
+          {/* Stats */}
           <StatsOverview
-            totalPRs={currentUser.totalPRs}
-            mergedPRs={currentUser.mergedPRs}
-            totalPoints={currentUser.totalPoints}
+            totalPRs={profileUser.totalPRs}
+            mergedPRs={profileUser.mergedPRs}
+            totalPoints={profileUser.totalPoints}
             rank={userRank}
-            isLoading={false}
+            isLoading={isLoading}
           />
 
-          {/* Badges Section */}
-          <BadgesSection badges={userBadges} isLoading={false} />
+          {/* Badges */}
+          <BadgesSection badges={badges} isLoading={isLoading} />
 
-          {/* Two Column Layout for larger screens */}
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Main Content - 2 columns */}
+          {/* Content Grid */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
-              {/* Joined Projects */}
               <JoinedProjects projects={userProjects} isLoading={false} />
-
-              {/* Pull Requests Table */}
               <PullRequestsTable
                 pullRequests={userPullRequests}
                 isLoading={false}
               />
             </div>
 
-            {/* Sidebar - 1 column */}
-            <div className="space-y-8">
-              {/* Leaderboard Preview */}
+            <aside className="space-y-8">
               <LeaderboardPreview
                 entries={leaderboard}
                 currentUserId={currentUser.id}
                 isLoading={false}
               />
-            </div>
-          </div>
+            </aside>
+          </section>
         </div>
       </main>
     </div>

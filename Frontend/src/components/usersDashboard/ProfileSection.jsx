@@ -82,7 +82,7 @@ export function ProfileSection({ user, rank, isLoading }) {
           </div>
           <div className="px-6">
             <p className="text-3xl font-bold text-foreground">#{rank}</p>
-            <p className="text-sm text-muted-foreground">Global Rank</p>
+            <p className="text-sm text-muted-foreground">Rank</p>
           </div>
         </div>
       </div>

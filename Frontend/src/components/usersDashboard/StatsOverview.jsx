@@ -45,28 +45,24 @@ export function StatsOverview({ totalPRs, mergedPRs, totalPoints, rank, isLoadin
       icon: <GitPullRequest className="w-6 h-6 text-stellar-cyan" />,
       label: "Total Pull Requests",
       value: totalPRs,
-      trend: "+3 this week",
       glowClass: "hover:shadow-[0_0_30px_hsl(189_100%_62%/0.2)]",
     },
     {
       icon: <GitMerge className="w-6 h-6 text-cosmic-purple" />,
       label: "Merged PRs",
       value: mergedPRs,
-      trend: "+2 this week",
       glowClass: "hover:shadow-[0_0_30px_hsl(256_100%_68%/0.2)]",
     },
     {
       icon: <Trophy className="w-6 h-6 text-supernova-orange" />,
       label: "Total Points",
       value: totalPoints,
-      trend: "+450 pts",
       glowClass: "hover:shadow-[0_0_30px_hsl(25_95%_53%/0.2)]",
     },
     {
       icon: <TrendingUp className="w-6 h-6 text-nebula-pink" />,
       label: "Leaderboard Rank",
       value: `#${rank}`,
-      trend: "↑2 positions",
       glowClass: "hover:shadow-[0_0_30px_hsl(330_81%_60%/0.2)]",
     },
   ];
