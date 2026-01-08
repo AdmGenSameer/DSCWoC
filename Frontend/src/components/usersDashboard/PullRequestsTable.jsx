@@ -137,7 +137,7 @@ export function PullRequestsTable({ pullRequests, isLoading }) {
                     </td>
                     <td className="p-4 text-right">
                       <a
-                        href={`https://github.com/${pr.owner}/${pr.repository}/pull/1`}
+                        href={`https://github.com/${pr.owner}/${pr.repository}/pull/${pr.prNumber}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 rounded-md hover:bg-muted inline-flex transition-colors"
@@ -182,7 +182,7 @@ export function PullRequestsTable({ pullRequests, isLoading }) {
                 <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
                   <span>{format(new Date(pr.createdAt), "MMM d, yyyy")}</span>
                   <a
-                    href={`https://github.com/${pr.owner}/${pr.repository}/pull/1`}
+                    href={`https://github.com/${pr.owner}/${pr.repository}/pull/${pr.prNumber}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 hover:text-primary transition-colors"

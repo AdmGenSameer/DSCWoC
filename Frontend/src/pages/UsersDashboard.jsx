@@ -14,13 +14,12 @@ import { EventCountdown } from "../components/usersDashboard/EventCountdown.jsx"
 import {
   currentUser,
   userProjects,
-  userPullRequests,
   leaderboard,
   getUserRank,
   eventDates,
 } from "../data/mockData";
 
-import { useUserDashboardData } from "../hooks/useApi.js";
+import { useUserDashboardData, useUserPullRequests } from "../hooks/useApi.js";
 
 /* -------------------------------- Utilities -------------------------------- */
 
@@ -41,6 +40,11 @@ export default function Dashboard() {
   const user = useMemo(getInitialUser, []);
 
   const { data, isLoading, isError, error } = useUserDashboardData(Boolean(user));
+
+  const {
+    data: pullRequestsData,
+    isLoading: isPullRequestsLoading,
+  } = useUserPullRequests(data?.data?._id, { enabled: !!data?.data?._id });
 
   const clearAuthAndRedirect = useCallback(() => {
     localStorage.removeItem("user");
@@ -159,8 +163,17 @@ export default function Dashboard() {
             <div className="lg:col-span-2 space-y-8">
               <JoinedProjects projects={userProjects} isLoading={false} />
               <PullRequestsTable
-                pullRequests={userPullRequests}
-                isLoading={false}
+                pullRequests={pullRequestsData?.data.map((pr) => ({
+                  id: pr.github_pr_id,
+                  title: pr.title,
+                  repository: pr.project?.github_repo || "unknown-repo",
+                  owner: pr.project?.github_owner || "unknown-owner",
+                  status: pr.status || "unknown",
+                  createdAt: pr.createdAt || "2024-01-15T10:30:00Z",
+                  points: pr.points || 0,
+                  prNumber: pr.github_pr_number || 0,
+                })) || []}
+                isLoading={isPullRequestsLoading}
               />
             </div>
 

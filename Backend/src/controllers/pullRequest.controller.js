@@ -104,7 +104,7 @@ export const getUserPullRequests = asyncHandler(async (req, res) => {
   }
 
   const pullRequests = await PullRequest.find(filter)
-    .populate('project', 'name github_repo_url')
+    .populate('project', 'name github_repo github_owner')
     .populate('validation.validatedBy', 'name email')
     .sort({ 'github_data.created_at': -1 })
     .skip(skip)
