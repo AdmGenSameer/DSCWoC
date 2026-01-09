@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useIsMobile } from '../hooks/useIsMobile';
-
-gsap.registerPlugin(ScrollTrigger);
+import { useGsap } from '../hooks/useGsap';
 
 const AboutSection = () => {
   const terminalRef = useRef(null);
@@ -11,6 +8,7 @@ const AboutSection = () => {
   const [typedText, setTypedText] = useState('');
   const [currentLine, setCurrentLine] = useState(0);
   const isMobile = useIsMobile();
+  const { gsap, ScrollTrigger, isLoaded } = useGsap();
 
   const terminalLines = [
     '> INITIALIZING MISSION PROTOCOL...',
@@ -77,6 +75,11 @@ const AboutSection = () => {
     const terminal = terminalRef.current;
     const computer = computerRef.current;
     if (isMobile) return undefined;
+
+    // Wait until GSAP is loaded before initializing animations.
+    if (!isLoaded || !gsap) return undefined;
+
+    let stopTyping;
     
     if (computer) {
       // 3D computer animation
@@ -101,7 +104,7 @@ const AboutSection = () => {
             once: true,
             onEnter: () => {
               // Start typing effect when terminal comes into view
-              startTyping();
+              stopTyping = startTyping();
             }
           },
         }
@@ -135,9 +138,15 @@ const AboutSection = () => {
     }
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      try {
+        stopTyping?.();
+      } catch {
+        // ignore
+      }
+
+      ScrollTrigger?.getAll?.().forEach(trigger => trigger.kill());
     };
-  }, [isMobile]);
+  }, [isMobile, isLoaded, gsap, ScrollTrigger, startTyping]);
 
   const mobileInsights = [
     { label: 'Mission Status', value: 'Active', accent: 'from-cosmic-purple to-nebula-pink' },
