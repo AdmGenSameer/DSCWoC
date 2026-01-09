@@ -259,6 +259,53 @@ export const useBadges = () => {
 };
 
 /**
+ * Fetch User Dashboard Data
+ */
+export const useUserDashboardData = () => {
+  return useQuery({
+    queryKey: ['userDashboardData'],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) throw new Error('Unauthorized');
+      if (!response.ok) throw new Error('Failed to fetch user dashboard data');
+      return response.json();
+    },
+    staleTime: 15 * 60 * 1000, // User dashboard data changes infrequently
+    gcTime: 20 * 60 * 1000,
+  });
+};
+
+/**
+ * Fetch Pull request Data of logged in user
+ */
+export const useUserPullRequests = (id) => {
+  return useQuery({
+    queryKey: ['userPullRequests', id],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/pull-requests/user/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) throw new Error('Unauthorized');
+      if (!response.ok) throw new Error('Failed to fetch user pull requests');
+      return response.json();
+    },
+    enabled: !!id, // Don't fetch if id is not available
+    staleTime: 15 * 60 * 1000,
+    gcTime: 20 * 60 * 1000,
+  });
+};
+
+
+
+/**
  * Submit contact form
  */
 export const useSubmitContact = () => {
