@@ -186,13 +186,15 @@ const RewardsSection = () => {
       }
     });
 
-    // Animate title
+    // Animate title - only on desktop
     if (titleRef.current) {
       gsap.from(titleRef.current, {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top 80%',
-          toggleActions: 'play none none reverse',
+          toggleActions: 'play none none none', // Disable reverse for smoother scroll
+          once: true, // Only animate once to reduce overhead
+          fastScrollEnd: true, // Skip animations on fast scroll
         },
         opacity: 0,
         y: 30,
@@ -206,8 +208,9 @@ const RewardsSection = () => {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top 70%',
-          toggleActions: 'play none none none', // Removed reverse to reduce animations
-          once: true, // Only animate once
+          toggleActions: 'play none none none',
+          once: true,
+          fastScrollEnd: true,
         },
         opacity: 0,
         scale: 0.9,
@@ -224,8 +227,9 @@ const RewardsSection = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 70%',
-            toggleActions: 'play none none none', // Removed reverse
-            once: true, // Only animate once
+            toggleActions: 'play none none none',
+            once: true,
+            fastScrollEnd: true,
           },
           opacity: 0,
           x: -30,
@@ -243,14 +247,15 @@ const RewardsSection = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 55%',
-            toggleActions: 'play none none none', // Removed reverse
-            once: true, // Only animate once
+            toggleActions: 'play none none none',
+            once: true,
+            fastScrollEnd: true,
           },
           opacity: 0,
           y: 40,
           duration: 0.8,
           delay: 0.4 + index * 0.15,
-          force3D: true // removed extra force3D which was causing jank
+          force3D: true,
         });
       }
     });
@@ -264,8 +269,9 @@ const RewardsSection = () => {
           scrollTrigger: {
             trigger: sectionRef.current,
             start: 'top 75%',
-            toggleActions: 'play none none none', // Removed reverse
-            once: true, // Only animate once
+            toggleActions: 'play none none none',
+            once: true,
+            fastScrollEnd: true,
           },
           scaleX: 0,
           opacity: 0,
@@ -293,19 +299,19 @@ const RewardsSection = () => {
       ref={sectionRef}
       className="relative w-full py-20 sm:py-32 px-4 sm:px-6 bg-gradient-to-b from-slate-950 via-indigo-950/30 to-slate-950 overflow-hidden"
     >
-      {/* Cosmic background elements */}
+      {/* Cosmic background elements - static to avoid jank on scroll */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Nebula effects */}
-        <div className="absolute top-20 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-32 left-10 w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-3xl" />
+        {/* Nebula effects - reduced blur and animation overhead */}
+        <div className="absolute top-20 right-10 w-96 h-96 bg-purple-600/20 rounded-full blur-2xl" />
+        <div className="absolute bottom-32 left-10 w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-2xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-2xl" />
 
-        {/* Constellation dots */}
-        <div className="absolute top-10 left-1/4 w-2 h-2 bg-white/60 rounded-full animate-pulse" />
-        <div className="absolute top-32 right-1/3 w-1 h-1 bg-white/40 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute bottom-40 left-1/3 w-1.5 h-1.5 bg-purple-300/50 rounded-full animate-pulse" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute top-1/4 right-1/4 w-1 h-1 bg-blue-300/40 rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-1/3 right-1/5 w-2 h-2 bg-indigo-300/50 rounded-full animate-pulse" style={{ animationDelay: '0.8s' }} />
+        {/* Constellation dots - static, no animations */}
+        <div className="absolute top-10 left-1/4 w-2 h-2 bg-white/60 rounded-full" />
+        <div className="absolute top-32 right-1/3 w-1 h-1 bg-white/40 rounded-full" />
+        <div className="absolute bottom-40 left-1/3 w-1.5 h-1.5 bg-purple-300/50 rounded-full" />
+        <div className="absolute top-1/4 right-1/4 w-1 h-1 bg-blue-300/40 rounded-full" />
+        <div className="absolute bottom-1/3 right-1/5 w-2 h-2 bg-indigo-300/50 rounded-full" />
 
         {/* Orbital rings */}
         <div className="absolute top-1/3 right-20 w-32 h-32 border border-purple-500/20 rounded-full hidden sm:block" style={{ transform: 'rotate(45deg)' }} />
