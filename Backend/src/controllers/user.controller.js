@@ -372,14 +372,14 @@ export const getUserBadges = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
     .populate('badges', 'name description icon color rarity points_reward')
     .select('-__v');
-  
+
   if (!user) {
     return res.status(HTTP_STATUS.NOT_FOUND).json({
       status: 'error',
       message: ERROR_MESSAGES.NOT_FOUND,
     });
   }
-  
+
   successResponse(res, user.badges, 'User badges retrieved successfully');
 });
 
@@ -392,14 +392,14 @@ export const getUserPoints = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id)
     .populate('badges', 'name description icon color rarity points_reward')
     .select('-__v');
-  
+
   if (!user) {
     return res.status(HTTP_STATUS.NOT_FOUND).json({
       status: 'error',
       message: ERROR_MESSAGES.NOT_FOUND,
     });
   }
-  
+
   successResponse(res, user.stats.points, 'User points retrieved successfully');
 });
 

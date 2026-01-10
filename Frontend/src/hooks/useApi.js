@@ -37,7 +37,7 @@ export const useLeaderboard = (page = 1, limit = 10, filter = 'overall') => {
  */
 export const useProjects = (filters = {}) => {
   const { page = 1, limit = 12, difficulty, tags, tech, search, sortBy, order } = filters;
-  
+
   return useQuery({
     queryKey: ['projects', filters],
     queryFn: async () => {
@@ -133,7 +133,7 @@ export const useMyProjects = () => {
  */
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (projectData) => {
       const response = await fetch(`${API_BASE_URL}/projects`, {
@@ -144,7 +144,7 @@ export const useCreateProject = () => {
         },
         body: JSON.stringify(projectData),
       });
-      
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to create project');
       return result;
@@ -160,7 +160,7 @@ export const useCreateProject = () => {
  */
 export const useUpdateProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ projectId, data }) => {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
@@ -171,7 +171,7 @@ export const useUpdateProject = () => {
         },
         body: JSON.stringify(data),
       });
-      
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to update project');
       return result;
@@ -188,14 +188,14 @@ export const useUpdateProject = () => {
  */
 export const useSyncProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (projectId) => {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}/sync`, {
         method: 'POST',
         headers: getAuthHeaders(),
       });
-      
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to sync project');
       return result;
@@ -320,6 +320,7 @@ export const useSubmitContact = () => {
       });
 
       const result = await response.json();
+
       if (result.status !== 'success') {
         throw new Error(result.message || 'Failed to send message');
       }

@@ -7,19 +7,40 @@ const Starfield = () => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     let animationFrameId;
+    let lastFrameTime = 0;
+    const targetFrameMs = 1000 / 30;
+
+    const maxDpr = 1.5;
+    let dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+
     let stars = [];
     let shootingStars = [];
     let nebulaParticles = [];
 
     // Set canvas size
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = document.documentElement.scrollHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+      const width = Math.max(1, window.innerWidth);
+      const height = Math.max(1, window.innerHeight);
+
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+
+      // Draw in CSS pixels.
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
+
+    const getCanvasCssSize = () => ({
+      width: Math.max(1, window.innerWidth),
+      height: Math.max(1, window.innerHeight),
+    });
 
     // Create stars with color variations
     const createStars = (count) => {
       stars = [];
+      const { width, height } = getCanvasCssSize();
       for (let i = 0; i < count; i++) {
         const colorChoice = Math.random();
         let color;
@@ -30,10 +51,10 @@ const Starfield = () => {
         } else {
           color = { r: 236, g: 72, b: 153 }; // Pink
         }
-        
+
         stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * width,
+          y: Math.random() * height,
           radius: Math.random() * 1.8,
           opacity: Math.random() * 0.8 + 0.2,
           vx: (Math.random() - 0.5) * 0.15,
@@ -47,10 +68,11 @@ const Starfield = () => {
     // Create nebula particles
     const createNebulaParticles = (count) => {
       nebulaParticles = [];
+      const { width, height } = getCanvasCssSize();
       for (let i = 0; i < count; i++) {
         nebulaParticles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * width,
+          y: Math.random() * height,
           radius: Math.random() * 40 + 20,
           opacity: Math.random() * 0.15 + 0.05,
           vx: (Math.random() - 0.5) * 0.2,
@@ -62,9 +84,10 @@ const Starfield = () => {
 
     // Create shooting star
     const createShootingStar = () => {
+      const { width, height } = getCanvasCssSize();
       shootingStars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * (canvas.height / 3),
+        x: Math.random() * width,
+        y: Math.random() * (height / 3),
         length: Math.random() * 80 + 40,
         speed: Math.random() * 8 + 6,
         opacity: 1,
@@ -74,8 +97,16 @@ const Starfield = () => {
     };
 
     // Animate everything
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const animate = (time) => {
+      // Throttle redraw to reduce main-thread work.
+      if (time - lastFrameTime < targetFrameMs) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTime = time;
+
+      const { width, height } = getCanvasCssSize();
+      ctx.clearRect(0, 0, width, height);
 
       // Draw nebula particles first (background layer)
       nebulaParticles.forEach((particle) => {
@@ -85,7 +116,7 @@ const Starfield = () => {
         );
         gradient.addColorStop(0, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${particle.opacity})`);
         gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-        
+
         ctx.fillStyle = gradient;
         ctx.fillRect(
           particle.x - particle.radius,
@@ -97,10 +128,10 @@ const Starfield = () => {
         particle.x += particle.vx;
         particle.y += particle.vy;
 
-        if (particle.x < -particle.radius) particle.x = canvas.width + particle.radius;
-        if (particle.x > canvas.width + particle.radius) particle.x = -particle.radius;
-        if (particle.y < -particle.radius) particle.y = canvas.height + particle.radius;
-        if (particle.y > canvas.height + particle.radius) particle.y = -particle.radius;
+        if (particle.x < -particle.radius) particle.x = width + particle.radius;
+        if (particle.x > width + particle.radius) particle.x = -particle.radius;
+        if (particle.y < -particle.radius) particle.y = height + particle.radius;
+        if (particle.y > height + particle.radius) particle.y = -particle.radius;
       });
 
       // Draw stars with twinkling
@@ -110,7 +141,7 @@ const Starfield = () => {
 
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        
+
         // Add glow to colored stars
         if (star.color.r !== 255) {
           const glow = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.radius * 3);
@@ -119,17 +150,17 @@ const Starfield = () => {
           ctx.fillStyle = glow;
           ctx.fillRect(star.x - star.radius * 3, star.y - star.radius * 3, star.radius * 6, star.radius * 6);
         }
-        
+
         ctx.fillStyle = `rgba(${star.color.r}, ${star.color.g}, ${star.color.b}, ${star.opacity})`;
         ctx.fill();
 
         star.x += star.vx;
         star.y += star.vy;
 
-        if (star.x < 0) star.x = canvas.width;
-        if (star.x > canvas.width) star.x = 0;
-        if (star.y < 0) star.y = canvas.height;
-        if (star.y > canvas.height) star.y = 0;
+        if (star.x < 0) star.x = width;
+        if (star.x > width) star.x = 0;
+        if (star.y < 0) star.y = height;
+        if (star.y > height) star.y = 0;
       });
 
       // Draw shooting stars
@@ -138,11 +169,11 @@ const Starfield = () => {
         ctx.moveTo(star.x, star.y);
         const endX = star.x + Math.cos(star.angle) * star.length;
         const endY = star.y + Math.sin(star.angle) * star.length;
-        
+
         const gradient = ctx.createLinearGradient(star.x, star.y, endX, endY);
         gradient.addColorStop(0, `rgba(${star.color.r}, ${star.color.g}, ${star.color.b}, ${star.opacity})`);
         gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        
+
         ctx.strokeStyle = gradient;
         ctx.lineWidth = 2;
         ctx.lineTo(endX, endY);
@@ -157,7 +188,7 @@ const Starfield = () => {
         star.y += Math.sin(star.angle) * star.speed;
         star.opacity -= 0.01;
 
-        if (star.opacity <= 0 || star.x > canvas.width || star.y > canvas.height) {
+        if (star.opacity <= 0 || star.x > width || star.y > height) {
           shootingStars.splice(index, 1);
         }
       });
@@ -167,9 +198,12 @@ const Starfield = () => {
 
     // Initialize
     resizeCanvas();
-    createStars(300);
-    createNebulaParticles(15);
-    animate();
+    // Scale counts down on smaller screens.
+    const { width, height } = getCanvasCssSize();
+    const areaScale = Math.min(1, (width * height) / (1440 * 900));
+    createStars(Math.floor(220 * areaScale + 80));
+    createNebulaParticles(Math.floor(10 * areaScale + 6));
+    animationFrameId = requestAnimationFrame(animate);
 
     // Create shooting stars periodically
     const shootingStarInterval = setInterval(() => {
@@ -181,15 +215,32 @@ const Starfield = () => {
     // Handle resize
     const handleResize = () => {
       resizeCanvas();
-      createStars(300);
-      createNebulaParticles(15);
+      const { width, height } = getCanvasCssSize();
+      const areaScale = Math.min(1, (width * height) / (1440 * 900));
+      createStars(Math.floor(220 * areaScale + 80));
+      createNebulaParticles(Math.floor(10 * areaScale + 6));
+    };
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+        return;
+      }
+
+      if (!animationFrameId) {
+        lastFrameTime = 0;
+        animationFrameId = requestAnimationFrame(animate);
+      }
     };
 
     window.addEventListener('resize', handleResize);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
       clearInterval(shootingStarInterval);
     };
   }, []);
@@ -198,7 +249,7 @@ const Starfield = () => {
     <canvas
       ref={canvasRef}
       className="fixed top-0 left-0 w-full h-full pointer-events-none z-0"
-      style={{ 
+      style={{
         background: 'radial-gradient(ellipse at 20% 20%, rgba(13, 2, 33, 0.8) 0%, rgba(0, 0, 0, 1) 50%), radial-gradient(ellipse at 80% 80%, rgba(26, 5, 51, 0.6) 0%, rgba(0, 0, 0, 1) 50%), #000000'
       }}
     />
