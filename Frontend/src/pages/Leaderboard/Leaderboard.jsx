@@ -151,7 +151,7 @@ const Leaderboard = () => {
                     {/* Hero card */}
                     <section className="lb-hero" aria-label="Leaderboard summary">
                         <div className="lb-hero-left">
-                            <h1 className="lb-title">ECWoC 2026<br /><span className="lb-title-accent">Leaderboard.</span></h1>
+                            <h1 className="lb-title">DSWoC 2026<br /><span className="lb-title-accent">Leaderboard.</span></h1>
                         </div>
 
                         <div className="lb-hero-right">

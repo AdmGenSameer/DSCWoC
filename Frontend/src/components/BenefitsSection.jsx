@@ -9,6 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 const BenefitsSection = () => {
   const isMobile = useIsMobile();
   const cardRefs = useRef([]);
+  const cardContainerRefs = useRef([]);
   const titleRef = useRef(null);
   const sectionRef = useRef(null);
   const orbitRefs = useRef([]);
@@ -81,6 +82,9 @@ const BenefitsSection = () => {
   useEffect(() => {
     if (isMobile) return; // Skip GSAP animations on mobile
 
+    const cardsSnapshot = cardRefs.current;
+    const containersSnapshot = cardContainerRefs.current;
+
     // Animate title
     if (titleRef.current) {
       gsap.fromTo(
@@ -105,13 +109,15 @@ const BenefitsSection = () => {
     }
 
     // Animate cards with stagger and 3D effect
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
+    cardsSnapshot.forEach((card, index) => {
+      const container = containersSnapshot[index];
+      if (!card || !container) return;
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: card,
-          start: 'top 85%',
+          start: 'top 95%',
+          once: true,
         },
       });
 
@@ -119,7 +125,7 @@ const BenefitsSection = () => {
         card,
         {
           opacity: 0,
-          y: 150,
+          y: 120,
           rotationY: -45,
           z: -200,
         },
@@ -128,20 +134,21 @@ const BenefitsSection = () => {
           y: 0,
           rotationY: 0,
           z: 0,
-          duration: 1.2,
-          delay: index * 0.15,
-          ease: 'power3.out',
+          duration: 0.9,
+          delay: Math.min(index * 0.08, 0.3),
+          ease: 'power2.out',
         }
       );
 
-      // Hover animation
-      card.addEventListener('mouseenter', () => {
+      // Hover animation (named handlers so we can remove them in cleanup)
+      const handleEnter = () => {
         gsap.to(card, {
-          y: -20,
-          rotationY: 5,
+          y: -18,
+          rotationY: 6,
           scale: 1.05,
-          duration: 0.6,
+          duration: 0.45,
           ease: 'power2.out',
+          overwrite: 'auto',
         });
 
         const orbit = orbitRefs.current[index];
@@ -149,19 +156,21 @@ const BenefitsSection = () => {
           gsap.to(orbit, {
             scale: 1.2,
             opacity: 1,
-            duration: 0.6,
+            duration: 0.45,
             ease: 'power2.out',
+            overwrite: 'auto',
           });
         }
-      });
+      };
 
-      card.addEventListener('mouseleave', () => {
+      const handleLeave = () => {
         gsap.to(card, {
           y: 0,
           rotationY: 0,
           scale: 1,
-          duration: 0.6,
+          duration: 0.5,
           ease: 'power2.inOut',
+          overwrite: 'auto',
         });
 
         const orbit = orbitRefs.current[index];
@@ -169,20 +178,20 @@ const BenefitsSection = () => {
           gsap.to(orbit, {
             scale: 1,
             opacity: 0.6,
-            duration: 0.6,
+            duration: 0.5,
             ease: 'power2.inOut',
+            overwrite: 'auto',
           });
         }
-      });
+      };
 
-      // Continuous floating animation
-      gsap.to(card, {
-        y: '+=15',
-        duration: 2 + index * 0.3,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-      });
+      container.addEventListener('pointerenter', handleEnter);
+      container.addEventListener('pointerleave', handleLeave);
+
+      // attach for cleanup
+      if (!container._bs_cleanup) container._bs_cleanup = {};
+      container._bs_cleanup.enter = handleEnter;
+      container._bs_cleanup.leave = handleLeave;
     });
 
     // Animate orbits
@@ -199,6 +208,16 @@ const BenefitsSection = () => {
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+      // cleanup event listeners and kill float tweens
+      containersSnapshot.forEach((container) => {
+        if (!container) return;
+        if (container._bs_cleanup) {
+          container.removeEventListener('pointerenter', container._bs_cleanup.enter);
+          container.removeEventListener('pointerleave', container._bs_cleanup.leave);
+          delete container._bs_cleanup;
+        }
+      });
     };
   }, [isMobile]);
 
@@ -292,6 +311,9 @@ const BenefitsSection = () => {
               key={index}
               className="relative"
               style={{ transformStyle: 'preserve-3d' }}
+              ref={el => {
+                cardContainerRefs.current[index] = el;
+              }}
             >
               {/* Orbit ring */}
               <div
