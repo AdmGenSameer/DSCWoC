@@ -38,6 +38,7 @@ export const useLeaderboard = (page = 1, limit = 10, filter = 'overall') => {
 export const useProjects = (filters = {}) => {
   const { page = 1, limit = 12, difficulty, tags, tech, search, sortBy, order } = filters;
   
+
   return useQuery({
     queryKey: ['projects', filters],
     queryFn: async () => {
@@ -133,7 +134,7 @@ export const useMyProjects = () => {
  */
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (projectData) => {
       const response = await fetch(`${API_BASE_URL}/projects`, {
@@ -144,7 +145,7 @@ export const useCreateProject = () => {
         },
         body: JSON.stringify(projectData),
       });
-      
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to create project');
       return result;
@@ -160,7 +161,7 @@ export const useCreateProject = () => {
  */
 export const useUpdateProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ projectId, data }) => {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
@@ -171,7 +172,7 @@ export const useUpdateProject = () => {
         },
         body: JSON.stringify(data),
       });
-      
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to update project');
       return result;
@@ -188,14 +189,14 @@ export const useUpdateProject = () => {
  */
 export const useSyncProject = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (projectId) => {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}/sync`, {
         method: 'POST',
         headers: getAuthHeaders(),
       });
-      
+
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to sync project');
       return result;
@@ -257,6 +258,53 @@ export const useBadges = () => {
     gcTime: 20 * 60 * 1000,
   });
 };
+
+/**
+ * Fetch User Dashboard Data
+ */
+export const useUserDashboardData = () => {
+  return useQuery({
+    queryKey: ['userDashboardData'],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) throw new Error('Unauthorized');
+      if (!response.ok) throw new Error('Failed to fetch user dashboard data');
+      return response.json();
+    },
+    staleTime: 15 * 60 * 1000, // User dashboard data changes infrequently
+    gcTime: 20 * 60 * 1000,
+  });
+};
+
+/**
+ * Fetch Pull request Data of logged in user
+ */
+export const useUserPullRequests = (id) => {
+  return useQuery({
+    queryKey: ['userPullRequests', id],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/pull-requests/user/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) throw new Error('Unauthorized');
+      if (!response.ok) throw new Error('Failed to fetch user pull requests');
+      return response.json();
+    },
+    enabled: !!id, // Don't fetch if id is not available
+    staleTime: 15 * 60 * 1000,
+    gcTime: 20 * 60 * 1000,
+  });
+};
+
+
 
 /**
  * Submit contact form
