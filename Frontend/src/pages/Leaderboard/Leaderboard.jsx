@@ -67,6 +67,51 @@ const Leaderboard = () => {
 
     const [liveNow, setLiveNow] = useState(() => new Date());
 
+    // Countdown timer state
+    const [countdown, setCountdown] = useState({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        isLive: false,
+    });
+
+    // Calculate countdown to January 15, 2026
+    useEffect(() => {
+        const calculateCountdown = () => {
+            const launchDate = new Date('2026-01-15T00:00:00Z');
+            const now = new Date();
+            const diff = launchDate - now;
+
+            if (diff <= 0) {
+                setCountdown({
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    isLive: true,
+                });
+            } else {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                setCountdown({
+                    days,
+                    hours,
+                    minutes,
+                    seconds,
+                    isLive: false,
+                });
+            }
+        };
+
+        calculateCountdown();
+        const interval = setInterval(calculateCountdown, 1000);
+        return () => clearInterval(interval);
+    }, []);
+
     // Fetch leaderboard data (paginated)
     const {
         data: leaderboardData,
@@ -144,13 +189,53 @@ const Leaderboard = () => {
             {/* Navigation */}
             <Navbar />
 
+            {/* Countdown Timer Overlay - Shows before January 15 */}
+            {!countdown.isLive && (
+                <div className="countdown-overlay">
+                    <div className="countdown-container">
+                        <h2 className="countdown-title">Leaderboard Locked</h2>
+                        <p className="countdown-description">Please wait for the leaderboard to open.</p>
+                        <div className="countdown-timer">
+                            <div className="countdown-unit">
+                                <span className="countdown-value">{String(countdown.days).padStart(2, '0')}</span>
+                                <span className="countdown-label">Days</span>
+                            </div>
+                            <span className="countdown-separator">:</span>
+                            <div className="countdown-unit">
+                                <span className="countdown-value">{String(countdown.hours).padStart(2, '0')}</span>
+                                <span className="countdown-label">Hours</span>
+                            </div>
+                            <span className="countdown-separator">:</span>
+                            <div className="countdown-unit">
+                                <span className="countdown-value">{String(countdown.minutes).padStart(2, '0')}</span>
+                                <span className="countdown-label">Minutes</span>
+                            </div>
+                            <span className="countdown-separator">:</span>
+                            <div className="countdown-unit">
+                                <span className="countdown-value">{String(countdown.seconds).padStart(2, '0')}</span>
+                                <span className="countdown-label">Seconds</span>
+                            </div>
+                        </div>
+                        <a 
+                            href="https://docs.google.com/forms/d/e/1FAIpQLSdcSsjLNUcR0K--noBp3AhwmuEYRIRVfjRHIPTqZ68jHtI90g/viewform?usp=dialog" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="register-btn"
+                        >
+                            Register Now
+                        </a>
+                        <p className="countdown-subtitle">DSCWoC 2026 Leaderboard Coming Soon</p>
+                    </div>
+                </div>
+            )}
+
             {/* Main Content */}
             <div className="leaderboard-content">
                 <div className="lb-page">
                     {/* Hero card */}
                     <section className="lb-hero" aria-label="Leaderboard summary">
                         <div className="lb-hero-left">
-                            <h1 className="lb-title">DSWoC 2026<br /><span className="lb-title-accent">Leaderboard.</span></h1>
+                            <h1 className="lb-title">DSCWoC 2026<br /><span className="lb-title-accent">Leaderboard.</span></h1>
                         </div>
 
                         <div className="lb-hero-right">

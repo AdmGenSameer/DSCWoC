@@ -48,6 +48,7 @@ export const useLeaderboard = (page = 1, limit = 10, filter = 'overall') => {
  */
 export const useProjects = (filters = {}) => {
   const { page = 1, limit = 12, difficulty, tags, tech, search, sortBy, order } = filters;
+  
 
   return useQuery({
     queryKey: ['projects', filters],
@@ -336,7 +337,6 @@ export const useSubmitContact = () => {
       });
 
       const result = await response.json();
-
       if (result.status !== 'success') {
         throw new Error(result.message || 'Failed to send message');
       }
