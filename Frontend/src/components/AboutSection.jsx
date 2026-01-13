@@ -225,6 +225,7 @@ const AboutSection = () => {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Mobile OUR VISION Section */}
         <div className="pt-12 border-t border-cosmic-purple/20">
@@ -244,6 +245,8 @@ const AboutSection = () => {
               <div className="text-xl font-bold text-nebula-pink mb-1">∞ Impact</div>
               <p className="text-xs text-gray-400">Build lasting skills and develop community connections</p>
             </div>
+
+          </div>
 
           {/* Vision Content */}
           <div className="space-y-4">
