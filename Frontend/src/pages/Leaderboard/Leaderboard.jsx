@@ -7,7 +7,6 @@ import LeaderboardSocialLinks from '../../components/Leaderboard/LeaderboardSoci
 import LeaderboardPodium from '../../components/Leaderboard/LeaderboardPodium';
 import './Leaderboard.css';
 import Footer from "../../components/Footer";
-import LaunchCountdown from '../../components/LaunchCountdown';
 
 // Lazy load Starfield for performance
 const Starfield = lazy(() => import('../../components/Starfield'));
@@ -77,6 +76,16 @@ const Leaderboard = () => {
         seconds: 0,
         isLive: false,
     });
+
+    const launchStartRef = useRef(new Date());
+
+    const launchProgress = useMemo(() => {
+        const total = LAUNCH_DATE - launchStartRef.current;
+        const remaining = LAUNCH_DATE - new Date();
+        if (total <= 0) return 100;
+        const pct = ((total - remaining) / total) * 100;
+        return Math.min(100, Math.max(0, pct));
+    }, [countdown.seconds]);
 
     // Calculate countdown to launch
     useEffect(() => {
@@ -193,23 +202,66 @@ const Leaderboard = () => {
             {/* Countdown Timer Overlay - Shows before launch */}
             {!countdown.isLive && (
                 <div className="countdown-overlay">
-                    <div className="countdown-container">
-                        <LaunchCountdown
-                            target={LAUNCH_DATE}
-                            title="Leaderboard unlocks"
-                            subtitle="DSCWoC points go live at 9:00 PM IST"
-                            pillLabel="Locked"
-                            note="Times shown in your local time zone. The leaderboard unlocks automatically at T0."
-                        />
-                        <a
-                            href="https://docs.google.com/forms/d/e/1FAIpQLSdcSsjLNUcR0K--noBp3AhwmuEYRIRVfjRHIPTqZ68jHtI90g/viewform?usp=dialog"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="register-btn"
-                        >
-                            Register Now
-                        </a>
-                        <p className="countdown-subtitle">Goes live on 16 Jan, 9:00 PM IST</p>
+                    <div className="ship-console">
+                        <div className="ship-grid" aria-hidden="true" />
+                        <div className="ship-header">
+                            <div className="ship-pill">Status • Locked</div>
+                            <p className="ship-subtitle">Leaderboard launch sequence engaged</p>
+                            <h2 className="ship-title">Launch in</h2>
+                            <p className="ship-meta">Goes live on 16 Jan, 9:00 PM IST</p>
+                        </div>
+
+                        <div className="ship-countdown">
+                            {[{
+                                label: 'Days',
+                                value: String(countdown.days).padStart(2, '0'),
+                            }, {
+                                label: 'Hours',
+                                value: String(countdown.hours).padStart(2, '0'),
+                            }, {
+                                label: 'Minutes',
+                                value: String(countdown.minutes).padStart(2, '0'),
+                            }, {
+                                label: 'Seconds',
+                                value: String(countdown.seconds).padStart(2, '0'),
+                            }].map((item) => (
+                                <div key={item.label} className="ship-countdown-tile">
+                                    <div className="ship-countdown-value">{item.value}</div>
+                                    <div className="ship-countdown-label">{item.label}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="ship-progress">
+                            <div className="ship-progress-track">
+                                <div
+                                    className="ship-progress-fill"
+                                    style={{ width: `${launchProgress.toFixed(1)}%` }}
+                                />
+                            </div>
+                            <div className="ship-progress-meta">
+                                <span>Pre-flight checks</span>
+                                <span>{launchProgress.toFixed(0)}% complete</span>
+                            </div>
+                        </div>
+
+                        <div className="ship-actions">
+                            <a
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSdcSsjLNUcR0K--noBp3AhwmuEYRIRVfjRHIPTqZ68jHtI90g/viewform?usp=dialog"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ship-button primary"
+                            >
+                                Register Crew
+                            </a>
+                            <Link to="/guidelines" className="ship-button ghost">View Guidelines</Link>
+                        </div>
+
+                        <div className="ship-badges">
+                            <span className="ship-badge">Autolock at T0</span>
+                            <span className="ship-badge">Dock ID: DSC-WOC-2026</span>
+                            <span className="ship-badge">Timezone: IST</span>
+                        </div>
                     </div>
                 </div>
             )}
