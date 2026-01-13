@@ -26,6 +26,7 @@ import UsersDashboard from './pages/UsersDashboard.jsx';
 import Leaderboard from './pages/Leaderboard/Leaderboard';
 import Projects from './pages/Projects';
 import Guidelines from './pages/Guidelines';
+import Resources from './pages/Resources';
 
 // Loading fallback component
 const AnimationFallback = () => (
@@ -148,12 +149,12 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/userdashboard" element={<UsersDashboard />} />
+        <Route path="/dashboard" element={<UsersDashboard />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/mentor/dashboard" element={<Dashboard />} />
         <Route path="/about" element={<About />} />
         <Route path="/rewards" element={<Rewards />} />
+        <Route path="/resources" element={<Resources />} />
         <Route path="/guidelines" element={<Guidelines />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/contact" element={<Contact />} />
