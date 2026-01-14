@@ -1,25 +1,17 @@
 import { createCanvas, loadImage } from 'canvas';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// Skip font registration - use system fonts
-console.log('✅ Using system fonts (no registration needed)');
 
 /**
- * THE GUARANTEED FIX - STEP BY STEP IMPLEMENTATION
- * Canvas: 1011 x 639 pixels (verified 1× scale)
- * All positioning: TOP-LEFT ORIGIN ONLY
+ * Draw ID Card with user data
+ * Canvas: 1011 x 639 pixels
+ * Uses system fonts only (no registration)
  */
 export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) {
-  console.log('=== drawIdCard called with user data:', JSON.stringify(user, null, 2));
+  console.log('🎨 Drawing ID card for:', user.fullName);
   
   const CARD_WIDTH = 1011;
   const CARD_HEIGHT = 639;
-  const DEBUG = false; // DISABLE DEBUG BOXES
 
-  // Precise layout coordinates from position tool (1011 x 639 template)
+  // Layout coordinates
   const layout = {
     photo: { x: 187, y: 238, width: 186, height: 184 },
     name: { x: 202, y: 463, width: 157, height: 25, maxFontSize: 24, minFontSize: 12 },
@@ -30,47 +22,33 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
     qr: { x: 676, y: 454, size: 100 }
   };
 
-  // STEP 1: Create canvas at exact 1:1 scale (1011 x 639)
+  // Create canvas
   const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
   const ctx = canvas.getContext('2d');
 
-  // STEP 2: Draw template with TOP-LEFT ORIGIN (no centering)
+  // Draw template
   const template = await loadImage(templatePath);
   ctx.drawImage(template, 0, 0, CARD_WIDTH, CARD_HEIGHT);
 
-  // STEP 3: PHOTO CLIPPING FIX (aligned ellipse with top-left origin)
+  // Draw photo (ellipse clipping)
   const photo = await loadImage(photoBuffer);
-  
   ctx.save();
   ctx.beginPath();
-  // Ellipse center = photo box center
   ctx.ellipse(
     layout.photo.x + layout.photo.width / 2,
     layout.photo.y + layout.photo.height / 2,
     layout.photo.width / 2,
     layout.photo.height / 2,
-    0,
-    0,
-    Math.PI * 2
+    0, 0, Math.PI * 2
   );
   ctx.clip();
-  
-  // Draw photo at TOP-LEFT of bounding box (fills to edges)
-  ctx.drawImage(
-    photo,
-    layout.photo.x,
-    layout.photo.y,
-    layout.photo.width,
-    layout.photo.height
-  );
+  ctx.drawImage(photo, layout.photo.x, layout.photo.y, layout.photo.width, layout.photo.height);
   ctx.restore();
 
-  // STEP 5: QR CODE FIX with rounded corners to match template
+  // Draw QR code (rounded corners)
   const qr = await loadImage(qrBuffer);
   ctx.save();
-  
-  // Create rounded rectangle clipping path for QR
-  const qrRadius = 8; // Adjust this value to match your template's corner radius
+  const qrRadius = 8;
   ctx.beginPath();
   ctx.moveTo(layout.qr.x + qrRadius, layout.qr.y);
   ctx.lineTo(layout.qr.x + layout.qr.size - qrRadius, layout.qr.y);
@@ -83,51 +61,63 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
   ctx.quadraticCurveTo(layout.qr.x, layout.qr.y, layout.qr.x + qrRadius, layout.qr.y);
   ctx.closePath();
   ctx.clip();
-  
   ctx.drawImage(qr, layout.qr.x, layout.qr.y, layout.qr.size, layout.qr.size);
   ctx.restore();
 
-  // STEP 4: TEXT DRAWING - SIMPLIFIED AND EXPLICIT
+  // Setup text rendering
   ctx.save();
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.globalAlpha = 1.0; // Ensure full opacity
-  ctx.fillStyle = '#FFFFFF'; // Pure white for dark template
-  ctx.font = 'bold 20px sans-serif'; // Use generic sans-serif
-  
-  // Test text - hardcoded to ensure it appears
-  console.log('Drawing test text with system sans-serif font...');
-  ctx.fillText('TEST NAME HERE', layout.name.x, layout.name.y);
-  ctx.fillText('github123', layout.github.x, layout.github.y);
-  ctx.fillText('linkedin456', layout.linkedin.x, layout.linkedin.y);
-  ctx.fillText('test@email.com', layout.email.x, layout.email.y);
-  ctx.fillText('AUTH-KEY-TEST', layout.authKey.x, layout.authKey.y);
-  
-  ctx.restore();
+  ctx.globalAlpha = 1.0;
+  ctx.fillStyle = '#FFFFFF'; // White text
 
-  // STEP 6: DEBUG OVERLAY (red boxes prove alignment)
-  if (DEBUG) {
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    
-    // Photo box
-    ctx.strokeRect(layout.photo.x, layout.photo.y, layout.photo.width, layout.photo.height);
-    
-    // Name box
-    ctx.strokeRect(layout.name.x, layout.name.y, layout.name.width, layout.name.height);
-    
-    // QR box
-    ctx.strokeRect(layout.qr.x, layout.qr.y, layout.qr.size, layout.qr.size);
-    
-    // Social boxes
-    ctx.strokeRect(layout.linkedin.x, layout.linkedin.y, layout.linkedin.width, layout.linkedin.height);
-    ctx.strokeRect(layout.github.x, layout.github.y, layout.github.width, layout.github.height);
-    
-    // Bottom text boxes
-    ctx.strokeRect(layout.email.x, layout.email.y, layout.email.width, layout.email.height);
-    ctx.strokeRect(layout.authKey.x, layout.authKey.y, layout.authKey.width, layout.authKey.height);
+  // Helper to fit text
+  const fitText = (text, maxWidth, maxSize, minSize) => {
+    let size = maxSize;
+    while (size > minSize) {
+      ctx.font = `bold ${size}px Arial, Helvetica, sans-serif`;
+      if (ctx.measureText(text).width <= maxWidth) break;
+      size -= 0.5;
+    }
+    return size;
+  };
+
+  // Draw NAME
+  const nameText = String(user.fullName || 'Participant');
+  const nameSize = fitText(nameText, layout.name.width, layout.name.maxFontSize, layout.name.minFontSize);
+  ctx.font = `bold ${nameSize}px Arial, Helvetica, sans-serif`;
+  console.log(`📝 NAME: "${nameText}" (${nameSize}px)`);
+  ctx.fillText(nameText, layout.name.x, layout.name.y);
+
+  // Draw LINKEDIN
+  const linkedinText = user.linkedinUrl ? String(user.linkedinUrl.split('/').pop() || '') : '';
+  if (linkedinText) {
+    ctx.font = `500 ${Math.floor(layout.linkedin.height * 0.65)}px Arial, Helvetica, sans-serif`;
+    console.log(`🔗 LINKEDIN: "${linkedinText}"`);
+    ctx.fillText(linkedinText, layout.linkedin.x, layout.linkedin.y);
   }
 
-  // Export at 1× scale
+  // Draw GITHUB
+  const githubText = String(user.github_username || 'github');
+  ctx.font = `500 ${Math.floor(layout.github.height * 0.65)}px Arial, Helvetica, sans-serif`;
+  console.log(`🐙 GITHUB: "${githubText}"`);
+  ctx.fillText(githubText, layout.github.x, layout.github.y);
+
+  // Draw EMAIL
+  const emailText = String(user.email || 'user@email.com');
+  ctx.font = `400 ${Math.floor(layout.email.height * 0.7)}px Arial, Helvetica, sans-serif`;
+  console.log(`📧 EMAIL: "${emailText}"`);
+  ctx.fillText(emailText, layout.email.x, layout.email.y);
+
+  // Draw AUTH KEY
+  const authText = String(user.authKey || 'N/A');
+  ctx.font = `400 ${Math.floor(layout.authKey.height * 0.7)}px Arial, Helvetica, sans-serif`;
+  console.log(`🔑 AUTH KEY: "${authText}"`);
+  ctx.fillText(authText, layout.authKey.x, layout.authKey.y);
+
+  ctx.restore();
+
+  // Export
+  console.log('✅ ID card generated successfully');
   return canvas.toBuffer('image/png');
 }
