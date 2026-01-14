@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useState, lazy, Suspense } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useLeaderboard } from '../../hooks/useApi';
 import Navbar from '../../components/Navbar';
@@ -13,6 +13,7 @@ const Starfield = lazy(() => import('../../components/Starfield'));
 
 // Constants for pagination
 const ITEMS_PER_PAGE = 30;
+const LAUNCH_DATE = new Date('2026-01-16T15:30:00Z'); // 9:00 PM IST
 
 const formatLeaderboardDateTime = (date) => {
     try {
@@ -65,9 +66,61 @@ const Leaderboard = () => {
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
 
-    // For Last Updated and Live (IST)
-    const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
     const [liveNow, setLiveNow] = useState(() => new Date());
+
+    // Countdown timer state
+    const [countdown, setCountdown] = useState({
+        days: 0,
+        hours: 0,
+        minutes: 0,
+        seconds: 0,
+        isLive: false,
+    });
+
+    const launchStartRef = useRef(new Date());
+
+    const launchProgress = useMemo(() => {
+        const total = LAUNCH_DATE - launchStartRef.current;
+        const remaining = LAUNCH_DATE - new Date();
+        if (total <= 0) return 100;
+        const pct = ((total - remaining) / total) * 100;
+        return Math.min(100, Math.max(0, pct));
+    }, [countdown.seconds]);
+
+    // Calculate countdown to launch
+    useEffect(() => {
+        const calculateCountdown = () => {
+            const now = new Date();
+            const diff = LAUNCH_DATE - now;
+
+            if (diff <= 0) {
+                setCountdown({
+                    days: 0,
+                    hours: 0,
+                    minutes: 0,
+                    seconds: 0,
+                    isLive: true,
+                });
+            } else {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                setCountdown({
+                    days,
+                    hours,
+                    minutes,
+                    seconds,
+                    isLive: false,
+                });
+            }
+        };
+
+        calculateCountdown();
+        const interval = setInterval(calculateCountdown, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     // Fetch leaderboard data (paginated)
     const {
@@ -77,6 +130,11 @@ const Leaderboard = () => {
         error,
         refetch
     } = useLeaderboard(currentPage, ITEMS_PER_PAGE, 'overall');
+
+    // For Last Updated and Live (IST)
+    const lastUpdatedAt = useMemo(() => (
+        leaderboardData?.data ? new Date() : null
+    ), [leaderboardData?.data]);
 
     // Fetch top 3 (podium)
     const {
@@ -106,20 +164,16 @@ const Leaderboard = () => {
     }, [leaderboardData?.summary, pagination?.totalItems, users]);
 
     useEffect(() => {
-        if (leaderboardData?.data) {
-            setLastUpdatedAt(new Date());
-        }
-    }, [leaderboardData?.data]);
-
-    useEffect(() => {
         const id = setInterval(() => setLiveNow(new Date()), 1000);
         return () => clearInterval(id);
     }, []);
 
     // Prevent initial scroll-restoration/layout-shift nudging the page down.
+    const hasForcedScroll = useRef(false);
     useLayoutEffect(() => {
+        if (hasForcedScroll.current) return;
+        hasForcedScroll.current = true;
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        // A second tick helps if something mounts asynchronously (e.g., background canvas).
         requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }));
     }, []);
 
@@ -145,13 +199,80 @@ const Leaderboard = () => {
             {/* Navigation */}
             <Navbar />
 
+            {/* Countdown Timer Overlay - Shows before launch */}
+            {!countdown.isLive && (
+                <div className="countdown-overlay">
+                    <div className="ship-console">
+                        <div className="ship-grid" aria-hidden="true" />
+                        <div className="ship-header">
+                            <div className="ship-pill">Status • Locked</div>
+                            <p className="ship-subtitle">Leaderboard launch sequence engaged</p>
+                            <h2 className="ship-title">Launch in</h2>
+                            <p className="ship-meta">Goes live on 16 Jan, 9:00 PM IST</p>
+                        </div>
+
+                        <div className="ship-countdown">
+                            {[{
+                                label: 'Days',
+                                value: String(countdown.days).padStart(2, '0'),
+                            }, {
+                                label: 'Hours',
+                                value: String(countdown.hours).padStart(2, '0'),
+                            }, {
+                                label: 'Minutes',
+                                value: String(countdown.minutes).padStart(2, '0'),
+                            }, {
+                                label: 'Seconds',
+                                value: String(countdown.seconds).padStart(2, '0'),
+                            }].map((item) => (
+                                <div key={item.label} className="ship-countdown-tile">
+                                    <div className="ship-countdown-value">{item.value}</div>
+                                    <div className="ship-countdown-label">{item.label}</div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="ship-progress">
+                            <div className="ship-progress-track">
+                                <div
+                                    className="ship-progress-fill"
+                                    style={{ width: `${launchProgress.toFixed(1)}%` }}
+                                />
+                            </div>
+                            <div className="ship-progress-meta">
+                                <span>Pre-flight checks</span>
+                                <span>{launchProgress.toFixed(0)}% complete</span>
+                            </div>
+                        </div>
+
+                        <div className="ship-actions">
+                            <a
+                                href="https://docs.google.com/forms/d/e/1FAIpQLSdcSsjLNUcR0K--noBp3AhwmuEYRIRVfjRHIPTqZ68jHtI90g/viewform?usp=dialog"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ship-button primary"
+                            >
+                                Register Crew
+                            </a>
+                            <Link to="/guidelines" className="ship-button ghost">View Guidelines</Link>
+                        </div>
+
+                        <div className="ship-badges">
+                            <span className="ship-badge">Autolock at T0</span>
+                            <span className="ship-badge">Dock ID: DSC-WOC-2026</span>
+                            <span className="ship-badge">Timezone: IST</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Main Content */}
             <div className="leaderboard-content">
                 <div className="lb-page">
                     {/* Hero card */}
                     <section className="lb-hero" aria-label="Leaderboard summary">
                         <div className="lb-hero-left">
-                            <h1 className="lb-title">ECWoC 2026<br /><span className="lb-title-accent">Leaderboard.</span></h1>
+                            <h1 className="lb-title">DSCWoC 2026<br /><span className="lb-title-accent">Leaderboard.</span></h1>
                         </div>
 
                         <div className="lb-hero-right">

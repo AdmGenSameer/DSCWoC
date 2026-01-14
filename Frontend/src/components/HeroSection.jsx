@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import EventCountdown from './EventCountdown';
 
+
 const HeroSection = () => {
   const spaceshipRef = useRef(null);
 
@@ -9,7 +10,7 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
         {/* Left: Text Content */}
         <div className="space-y-4 sm:space-y-6 animate-fade-in text-center md:text-left">
-          <EventCountdown targetTime="2026-01-12T00:00:00Z" />
+          
 
           <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight">
             DSC WINTER OF CODE

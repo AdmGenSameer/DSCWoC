@@ -9,9 +9,30 @@ gsap.registerPlugin(ScrollTrigger);
 const BenefitsSection = () => {
   const isMobile = useIsMobile();
   const cardRefs = useRef([]);
+  const cardContainerRefs = useRef([]);
   const titleRef = useRef(null);
   const sectionRef = useRef(null);
   const orbitRefs = useRef([]);
+
+  // Deterministic "random" that is pure/idempotent (eslint react-hooks/purity safe).
+  const seeded = (seed) => {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
+  };
+
+  const buildStars = (count, opacityBase, opacityRange) =>
+    Array.from({ length: count }, (_, i) => {
+      const base = i * 7 + 1;
+      return {
+        top: `${seeded(base + 1) * 100}%`,
+        left: `${seeded(base + 2) * 100}%`,
+        animationDelay: `${seeded(base + 3) * 3}s`,
+        opacity: seeded(base + 4) * opacityRange + opacityBase,
+      };
+    });
+
+  const mobileStars = buildStars(18, 0.2, 0.45);
+  const desktopStars = buildStars(18, 0.25, 0.6);
 
   const benefits = [
     {
@@ -61,6 +82,9 @@ const BenefitsSection = () => {
   useEffect(() => {
     if (isMobile) return; // Skip GSAP animations on mobile
 
+    const cardsSnapshot = cardRefs.current;
+    const containersSnapshot = cardContainerRefs.current;
+
     // Animate title
     if (titleRef.current) {
       gsap.fromTo(
@@ -85,13 +109,15 @@ const BenefitsSection = () => {
     }
 
     // Animate cards with stagger and 3D effect
-    cardRefs.current.forEach((card, index) => {
-      if (!card) return;
+    cardsSnapshot.forEach((card, index) => {
+      const container = containersSnapshot[index];
+      if (!card || !container) return;
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: card,
-          start: 'top 85%',
+          start: 'top 95%',
+          once: true,
         },
       });
 
@@ -99,7 +125,7 @@ const BenefitsSection = () => {
         card,
         {
           opacity: 0,
-          y: 150,
+          y: 120,
           rotationY: -45,
           z: -200,
         },
@@ -108,20 +134,21 @@ const BenefitsSection = () => {
           y: 0,
           rotationY: 0,
           z: 0,
-          duration: 1.2,
-          delay: index * 0.15,
-          ease: 'power3.out',
+          duration: 0.9,
+          delay: Math.min(index * 0.08, 0.3),
+          ease: 'power2.out',
         }
       );
 
-      // Hover animation
-      card.addEventListener('mouseenter', () => {
+      // Hover animation (named handlers so we can remove them in cleanup)
+      const handleEnter = () => {
         gsap.to(card, {
-          y: -20,
-          rotationY: 5,
+          y: -18,
+          rotationY: 6,
           scale: 1.05,
-          duration: 0.6,
+          duration: 0.45,
           ease: 'power2.out',
+          overwrite: 'auto',
         });
 
         const orbit = orbitRefs.current[index];
@@ -129,19 +156,21 @@ const BenefitsSection = () => {
           gsap.to(orbit, {
             scale: 1.2,
             opacity: 1,
-            duration: 0.6,
+            duration: 0.45,
             ease: 'power2.out',
+            overwrite: 'auto',
           });
         }
-      });
+      };
 
-      card.addEventListener('mouseleave', () => {
+      const handleLeave = () => {
         gsap.to(card, {
           y: 0,
           rotationY: 0,
           scale: 1,
-          duration: 0.6,
+          duration: 0.5,
           ease: 'power2.inOut',
+          overwrite: 'auto',
         });
 
         const orbit = orbitRefs.current[index];
@@ -149,20 +178,20 @@ const BenefitsSection = () => {
           gsap.to(orbit, {
             scale: 1,
             opacity: 0.6,
-            duration: 0.6,
+            duration: 0.5,
             ease: 'power2.inOut',
+            overwrite: 'auto',
           });
         }
-      });
+      };
 
-      // Continuous floating animation
-      gsap.to(card, {
-        y: '+=15',
-        duration: 2 + index * 0.3,
-        repeat: -1,
-        yoyo: true,
-        ease: 'sine.inOut',
-      });
+      container.addEventListener('pointerenter', handleEnter);
+      container.addEventListener('pointerleave', handleLeave);
+
+      // attach for cleanup
+      if (!container._bs_cleanup) container._bs_cleanup = {};
+      container._bs_cleanup.enter = handleEnter;
+      container._bs_cleanup.leave = handleLeave;
     });
 
     // Animate orbits
@@ -179,6 +208,16 @@ const BenefitsSection = () => {
 
     return () => {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+
+      // cleanup event listeners and kill float tweens
+      containersSnapshot.forEach((container) => {
+        if (!container) return;
+        if (container._bs_cleanup) {
+          container.removeEventListener('pointerenter', container._bs_cleanup.enter);
+          container.removeEventListener('pointerleave', container._bs_cleanup.leave);
+          delete container._bs_cleanup;
+        }
+      });
     };
   }, [isMobile]);
 
@@ -188,16 +227,11 @@ const BenefitsSection = () => {
       <section id="rewards" className="relative py-12 px-3 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible' }}>
         {/* Animated background stars */}
         <div className="absolute inset-0 pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+          {mobileStars.map((star, i) => (
             <div
               key={i}
               className="absolute w-0.5 h-0.5 bg-white rounded-full animate-pulse"
-              style={{
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                opacity: Math.random() * 0.5 + 0.2,
-              }}
+              style={star}
             />
           ))}
         </div>
@@ -250,16 +284,11 @@ const BenefitsSection = () => {
     <section id="rewards" className="relative py-16 sm:py-20 md:py-32 px-4 sm:px-6 md:px-6 overflow-hidden w-full" style={{ display: 'block', visibility: 'visible', zIndex: 'auto' }}>
       {/* Animated background stars */}
       <div className="absolute inset-0 pointer-events-none">
-        {[...Array(30)].map((_, i) => (
+        {desktopStars.map((star, i) => (
           <div
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              opacity: Math.random() * 0.7 + 0.3,
-            }}
+            style={star}
           />
         ))}
       </div>
@@ -282,6 +311,9 @@ const BenefitsSection = () => {
               key={index}
               className="relative"
               style={{ transformStyle: 'preserve-3d' }}
+              ref={el => {
+                cardContainerRefs.current[index] = el;
+              }}
             >
               {/* Orbit ring */}
               <div
@@ -298,10 +330,12 @@ const BenefitsSection = () => {
                 ref={el => cardRefs.current[index] = el}
                 className="relative glass-effect rounded-3xl p-6 md:p-8 h-full group cursor-pointer overflow-hidden"
                 style={{
-                  background: 'rgba(17, 24, 39, 0.7)',
-                  backdropFilter: 'blur(12px)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'linear-gradient(135deg, rgba(17, 24, 39, 0.88), rgba(17, 24, 39, 0.65))',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  boxShadow: '0 25px 60px rgba(5, 5, 15, 0.45)',
+                  backdropFilter: 'none',
                   opacity: 1,
+                  willChange: 'transform',
                 }}
               >
                 {/* Gradient overlay */}
