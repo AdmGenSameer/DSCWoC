@@ -1,15 +1,12 @@
 FROM node:20-slim
 
-# Install required system dependencies and fonts
+# Install runtime dependencies for canvas and fonts
 RUN apt-get update && apt-get install -y \
-    python3 \
-    make \
-    g++ \
-    cairo-dev \
-    jpeg-dev \
-    pango-dev \
-    giflib-dev \
-    pixman-dev \
+    libcairo2 \
+    libjpeg62-turbo \
+    libpango1.0-0 \
+    libgif7 \
+    libpixman-1-0 \
     fonts-liberation \
     fonts-dejavu \
     fontconfig \
