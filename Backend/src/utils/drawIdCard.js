@@ -7,11 +7,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const fontsPath = path.join(__dirname, '../../assets/fonts');
 
 try {
-  registerFont(path.join(fontsPath, 'Inter-Regular.ttf'), {
-    family: 'Inter'
+  registerFont(path.join(fontsPath, 'DejaVuSans.ttf'), {
+    family: 'DejaVuSans'
   });
-  registerFont(path.join(fontsPath, 'Inter-Bold.ttf'), {
-    family: 'Inter',
+  registerFont(path.join(fontsPath, 'DejaVuSans-Bold.ttf'), {
+    family: 'DejaVuSans',
     weight: 'bold'
   });
   console.log('✅ Fonts registered successfully');
@@ -105,7 +105,7 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
   ctx.textBaseline = 'top';
   ctx.globalAlpha = 1.0; // Ensure full opacity
   ctx.fillStyle = '#FFFFFF'; // Pure white for dark template
-  ctx.font = 'bold 20px Inter, sans-serif';
+  ctx.font = 'bold 20px DejaVuSans';
   
   // Test text - hardcoded to ensure it appears
   console.log('Drawing test text...');
