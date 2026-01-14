@@ -1,11 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import User from '../models/User.model.js';
 import { generateQr } from '../utils/generateQr.js';
 import { drawIdCard } from '../utils/drawIdCard.js';
 
 const MAX_GENERATIONS = 2; // Back to limit of 2
-const templatePath = path.join(process.cwd(), 'assets', 'id-template.png');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const templatePath = path.join(__dirname, '../../assets', 'id-template.png');
 
 // Generate auth key in format DSW-26-XXXX
 function generateAuthKey() {
