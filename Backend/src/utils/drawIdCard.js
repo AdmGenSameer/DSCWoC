@@ -29,7 +29,7 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
   
   const CARD_WIDTH = 1011;
   const CARD_HEIGHT = 639;
-  const DEBUG = true; // DEBUG: Enable to see text box positions
+  const DEBUG = false; // DISABLE DEBUG BOXES
 
   // Precise layout coordinates from position tool (1011 x 639 template)
   const layout = {
@@ -99,78 +99,23 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
   ctx.drawImage(qr, layout.qr.x, layout.qr.y, layout.qr.size, layout.qr.size);
   ctx.restore();
 
-  // STEP 4: TEXT ALIGNMENT FIX (explicit top-left baseline)
+  // STEP 4: TEXT DRAWING - SIMPLIFIED AND EXPLICIT
+  ctx.save();
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-
-  // Helper: fit text in box width and return the final font string
-  const fitText = (text, maxWidth, maxSize, minSize, weight = '600') => {
-    let size = maxSize;
-    while (size > minSize) {
-      const fontWeight = weight === 'bold' ? 'bold' : weight;
-      // Use multiple fallback fonts
-      ctx.font = `${fontWeight} ${size}px Inter, "DejaVu Sans", Arial, sans-serif`;
-      if (ctx.measureText(text).width <= maxWidth) break;
-      size -= 0.5;
-    }
-    const fontWeight = weight === 'bold' ? 'bold' : weight;
-    return `${fontWeight} ${size}px Inter, "DejaVu Sans", Arial, sans-serif`;
-  };
-
-  // NAME (top-left origin)
-  // Dark color for participant name
-  ctx.fillStyle = '#000000'; // Pure black for maximum visibility
-  const nameText = String(user.fullName || 'Participant');
-  const nameFont = fitText(
-    nameText,
-    layout.name.width,
-    layout.name.maxFontSize,
-    layout.name.minFontSize,
-    'bold'
-  );
-  ctx.font = nameFont;
-  console.log('Drawing NAME:', nameText, 'Font:', nameFont, 'Color:', ctx.fillStyle);
-  ctx.fillText(nameText, layout.name.x, layout.name.y);
-
-  // LINKEDIN (top-left origin)
-  // Dark color for LinkedIn handle
-  ctx.fillStyle = '#000000'; // Pure black
-  const linkedinSize = Math.floor(layout.linkedin.height * 0.65);
-  ctx.font = `500 ${linkedinSize}px Inter, "DejaVu Sans", Arial, sans-serif`;
-  const linkedinText = user.linkedinUrl ? String(user.linkedinUrl.split('/').pop() || '') : '';
-  console.log('Drawing LINKEDIN:', linkedinText, 'Font:', ctx.font);
-  if (linkedinText) {
-    ctx.fillText(linkedinText, layout.linkedin.x, layout.linkedin.y);
-  }
-
-  // GITHUB (top-left origin)
-  // Dark color for GitHub handle
-  ctx.fillStyle = '#000000'; // Pure black
-  const githubSize = Math.floor(layout.github.height * 0.65);
-  ctx.font = `500 ${githubSize}px Inter, "DejaVu Sans", Arial, sans-serif`;
-  const githubText = String(user.github_username || 'github');
-  console.log('Drawing GITHUB:', githubText, 'Font:', ctx.font);
-  ctx.fillText(githubText, layout.github.x, layout.github.y);
-
-  // EMAIL (top-left origin)
-  // Dark color for email
-  ctx.fillStyle = '#000000'; // Pure black
-  const emailSize = Math.floor(layout.email.height * 0.7);
-  const emailText = String(user.email || 'user@email.com');
-  const emailFont = fitText(emailText, layout.email.width, emailSize, 7, '400');
-  ctx.font = emailFont;
-  console.log('Drawing EMAIL:', emailText, 'Font:', emailFont);
-  ctx.fillText(emailText, layout.email.x, layout.email.y);
-
-  // AUTH KEY (top-left origin)
-  // Dark color for authenticity key
-  ctx.fillStyle = '#000000'; // Pure black
-  const authSize = Math.floor(layout.authKey.height * 0.7);
-  const authText = String(user.authKey || user.github_username || 'N/A');
-  const authFont = fitText(authText, layout.authKey.width, authSize, 6, '400');
-  ctx.font = authFont;
-  console.log('Drawing AUTH KEY:', authText, 'Font:', authFont);
-  ctx.fillText(authText, layout.authKey.x, layout.authKey.y);
+  ctx.globalAlpha = 1.0; // Ensure full opacity
+  ctx.fillStyle = '#FFFFFF'; // Pure white for dark template
+  ctx.font = 'bold 20px Inter, sans-serif';
+  
+  // Test text - hardcoded to ensure it appears
+  console.log('Drawing test text...');
+  ctx.fillText('TEST NAME HERE', layout.name.x, layout.name.y);
+  ctx.fillText('github123', layout.github.x, layout.github.y);
+  ctx.fillText('linkedin456', layout.linkedin.x, layout.linkedin.y);
+  ctx.fillText('test@email.com', layout.email.x, layout.email.y);
+  ctx.fillText('AUTH-KEY-TEST', layout.authKey.x, layout.authKey.y);
+  
+  ctx.restore();
 
   // STEP 6: DEBUG OVERLAY (red boxes prove alignment)
   if (DEBUG) {
