@@ -247,7 +247,6 @@ export function IDCardGenerator({ user, isOpen, onClose }) {
                 />
               </div>
             </div>
-
             {/* Actions */}
             <div className="border-t border-white/10 px-6 py-4 flex gap-3">
               <button
@@ -256,12 +255,6 @@ export function IDCardGenerator({ user, isOpen, onClose }) {
               >
                 <Download className="w-4 h-4" />
                 Download
-              </button>
-              <button
-                onClick={handleClosePreview}
-                className="px-4 py-2 rounded-lg border border-white/20 text-white hover:bg-white/10 transition-all text-sm font-semibold"
-              >
-                Close
               </button>
             </div>
           </div>
