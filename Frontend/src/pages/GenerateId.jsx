@@ -342,12 +342,6 @@ const GenerateId = () => {
                 <Download className="w-5 h-5" />
                 Download High Quality PNG
               </button>
-              <button
-                onClick={handleClosePreview}
-                className="px-6 py-3 rounded-lg border border-white/20 text-white hover:bg-white/10 transition-all duration-200 font-semibold"
-              >
-                Generate Another
-              </button>
             </div>
           </div>
         </div>
