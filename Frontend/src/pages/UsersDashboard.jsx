@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Starfield from "../components/Starfield.jsx";
@@ -10,6 +10,7 @@ import { PullRequestsTable } from "../components/usersDashboard/PullRequestsTabl
 import { BadgesSection } from "../components/usersDashboard/BadgesSection.jsx";
 import { LeaderboardPreview } from "../components/usersDashboard/LeaderboardPreview.jsx";
 import { EventCountdown } from "../components/usersDashboard/EventCountdown.jsx";
+import { IDCardGenerator } from "../components/usersDashboard/IDCardGenerator.jsx";
 
 import { userProjects, eventDates } from "../data/mockData";
 
@@ -36,6 +37,7 @@ function getInitialUser() {
 export default function Dashboard() {
   const navigate = useNavigate();
   const user = useMemo(getInitialUser, []);
+  const [showIDCardModal, setShowIDCardModal] = useState(false);
 
   const { data, isLoading, isError, error } = useUserDashboardData({
     enabled: !!user,
@@ -168,6 +170,7 @@ export default function Dashboard() {
             user={profileUser}
             rank={userRank}
             isLoading={isLoading}
+            onGenerateIDCard={() => setShowIDCardModal(true)}
           />
 
           {/* Stats */}
@@ -211,6 +214,13 @@ export default function Dashboard() {
           </section>
         </div>
       </main>
+
+      {/* ID Card Generator Modal */}
+      <IDCardGenerator
+        user={data?.data || profileUser}
+        isOpen={showIDCardModal}
+        onClose={() => setShowIDCardModal(false)}
+      />
     </div>
   );
 }

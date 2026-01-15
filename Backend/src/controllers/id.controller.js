@@ -7,7 +7,18 @@ import { drawIdCard } from '../utils/drawIdCard.js';
 
 const MAX_GENERATIONS = 2; // Back to limit of 2
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const templatePath = path.join(__dirname, '../../assets', 'id-template.png');
+
+// Get template path based on user role
+function getTemplatePath(role) {
+  const roleTemplates = {
+    'Contributor': 'id-template-contributor.png',
+    'Mentor': 'id-template-mentor.png',
+    'Admin': 'id-template-admin.png',
+  };
+  // Default to contributor template for Participant or any other role
+  const templateFile = roleTemplates[role] || 'id-template-contributor.png';
+  return path.join(__dirname, '../../assets', templateFile);
+}
 
 // Generate auth key in format DSW-26-XXXX
 function generateAuthKey() {
@@ -36,13 +47,27 @@ export const generateIdCard = async (req, res, next) => {
       return res.status(400).json({ message: 'LinkedIn ID is required' });
     }
 
-    // ===== TESTING MODE: Skip database lookup =====
-    // Uncomment below for production mode
-    /*
-    // Find user by email
+    if (!file) {
+      return res.status(400).json({ message: 'Profile photo is required' });
+    }
+
+    // ===== PRODUCTION MODE: Query database for user role and check generation limit =====
     const user = await User.findOne({ email: email.toLowerCase() });
+    
     if (!user) {
-      return res.status(404).json({ message: 'Email not found. Please register first for DSCWoC 2026.' });
+      return res.status(404).json({ 
+        message: 'Email not found. Please register first for DSCWoC 2026.',
+        generationsLeft: 0
+      });
+    }
+
+    // Check generation limit
+    const generationsRemaining = MAX_GENERATIONS - (user.idGeneratedCount || 0);
+    if (generationsRemaining <= 0) {
+      return res.status(429).json({ 
+        message: 'Generation limit reached. You can only generate 2 ID cards.',
+        generationsLeft: 0
+      });
     }
 
     // Generate auth key if doesn't exist
@@ -66,28 +91,15 @@ export const generateIdCard = async (req, res, next) => {
       : `https://linkedin.com/in/${linkedinId}`;
     user.linkedinUrl = linkedinUrl;
 
-    if (user.idGeneratedCount >= MAX_GENERATIONS) {
-      return res.status(429).json({ message: 'Generation limit reached. You can only generate 2 ID cards.' });
-    }
-    */
-
-    // ===== TESTING: Use dummy user data =====
-    const authKey = generateAuthKey();
-    const linkedinUrl = linkedinId.startsWith('http') 
-      ? linkedinId 
-      : `https://linkedin.com/in/${linkedinId}`;
-    
-    const user = {
-      fullName: name,
-      role: 'Participant',
-      github_username: githubId,
-      linkedinUrl: linkedinUrl,
-      authKey: authKey,
-      email: email,
-    };
+    // Increment generation count
+    user.idGeneratedCount = (user.idGeneratedCount || 0) + 1;
+    await user.save();
 
     // Generate QR with auth key
     const qrBuffer = await generateQr(user.authKey);
+
+    // Get the appropriate template based on user role
+    const templatePath = getTemplatePath(user.role);
 
     const idBuffer = await drawIdCard({
       templatePath,
@@ -103,17 +115,13 @@ export const generateIdCard = async (req, res, next) => {
       },
     });
 
-    // ===== TESTING: Skip database update =====
-    // Uncomment below for production mode
-    /*
-    // Increment count and save user with updated authKey and LinkedIn
-    user.idGeneratedCount = (user.idGeneratedCount || 0) + 1;
-    await user.save();
-    */
-
+    // Send response with headers
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Content-Disposition', 'attachment; filename="DSWC_ID.png"');
+    res.setHeader('Content-Disposition', `attachment; filename="DSCWoC_2026_${user.role}_Card.png"`);
     res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-User-Role', user.role);
+    res.setHeader('X-Generations-Left', generationsRemaining - 1);
+    
     return res.send(idBuffer);
   } catch (err) {
     return next(err);
