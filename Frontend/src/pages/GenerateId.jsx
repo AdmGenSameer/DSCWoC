@@ -211,7 +211,7 @@ const GenerateId = () => {
 
       <div className="relative z-10">
         {/* Header */}
-        <header className="bg-white/5 backdrop-blur-lg border-b border-white/10 sticky top-0">
+        <header className="bg-white/5 backdrop-blur-lg border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center py-4">
               <div>
