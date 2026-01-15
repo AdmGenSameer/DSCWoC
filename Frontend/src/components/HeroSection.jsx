@@ -1,17 +1,10 @@
-import { useRef, useState } from 'react';
-import { IDCardGenerator } from './usersDashboard/IDCardGenerator';
+import { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Ticket } from 'lucide-react';
 
 const HeroSection = () => {
   const spaceshipRef = useRef(null);
-  const [showIDCardModal, setShowIDCardModal] = useState(false);
-  
-  // Mock user data for home page ID card
-  const mockUser = {
-    fullName: 'Contributor',
-    email: '',
-    github_username: '',
-  };
+  const navigate = useNavigate();
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 pt-20 sm:pt-24">
@@ -44,7 +37,7 @@ const HeroSection = () => {
               BECOME A MENTOR
             </button>
             <button
-              onClick={() => setShowIDCardModal(true)}
+              onClick={() => navigate('/generate-id')}
               className="retro-button border-2 border-cyan-500 text-cyan-400 hover:bg-cyan-500/20 px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-sm sm:text-base font-semibold transition-all duration-300 hover:-translate-y-1 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-cyan-500/30">
               <Ticket className="w-4 h-4" />
               GET ID CARD
@@ -768,13 +761,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-
-      {/* ID Card Generator Modal */}
-      <IDCardGenerator 
-        user={mockUser} 
-        isOpen={showIDCardModal} 
-        onClose={() => setShowIDCardModal(false)} 
-      />
     </section>
   );
 };
