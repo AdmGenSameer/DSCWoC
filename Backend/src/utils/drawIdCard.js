@@ -2,29 +2,38 @@ import { createCanvas, loadImage } from 'canvas';
 
 /**
  * Draw ID Card with user data
- * Canvas: 1011 x 639 pixels
+ * Canvas: 2022 x 1278 pixels (2x resolution for high quality)
  * Uses system fonts only (no registration)
  */
 export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) {
   console.log('🎨 Drawing ID card for:', user.fullName);
   
-  const CARD_WIDTH = 1011;
-  const CARD_HEIGHT = 639;
+  // 2x resolution for maximum quality
+  const SCALE = 2;
+  const CARD_WIDTH = 1011 * SCALE;
+  const CARD_HEIGHT = 639 * SCALE;
 
-  // Layout coordinates
+  // Layout coordinates (scaled 2x)
   const layout = {
-    photo: { x: 187, y: 238, width: 186, height: 184 },
-    name: { x: 202, y: 463, width: 157, height: 25, maxFontSize: 24, minFontSize: 12 },
-    linkedin: { x: 251, y: 503, width: 121, height: 20 },
-    github: { x: 250, y: 531, width: 121, height: 20 },
-    authKey: { x: 143, y: 578, width: 126, height: 20 },
-    email: { x: 593, y: 579, width: 143, height: 20 },
-    qr: { x: 676, y: 454, size: 100 }
+    photo: { x: 187 * SCALE, y: 238 * SCALE, width: 186 * SCALE, height: 184 * SCALE },
+    name: { x: 202 * SCALE, y: 463 * SCALE, width: 157 * SCALE, height: 25 * SCALE, maxFontSize: 24 * SCALE, minFontSize: 12 * SCALE },
+    linkedin: { x: 251 * SCALE, y: 503 * SCALE, width: 121 * SCALE, height: 20 * SCALE },
+    github: { x: 250 * SCALE, y: 531 * SCALE, width: 121 * SCALE, height: 20 * SCALE },
+    authKey: { x: 143 * SCALE, y: 578 * SCALE, width: 126 * SCALE, height: 20 * SCALE },
+    email: { x: 593 * SCALE, y: 579 * SCALE, width: 143 * SCALE, height: 20 * SCALE },
+    qr: { x: 676 * SCALE, y: 454 * SCALE, size: 100 * SCALE }
   };
 
-  // Create canvas
+  // Create high-resolution canvas
   const canvas = createCanvas(CARD_WIDTH, CARD_HEIGHT);
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: false });
+  
+  // Enable antialiasing and high-quality rendering
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.antialias = 'subpixel';
+  ctx.patternQuality = 'best';
+  ctx.quality = 'best';
 
   // Draw template
   const template = await loadImage(templatePath);
@@ -48,7 +57,7 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
   // Draw QR code (rounded corners)
   const qr = await loadImage(qrBuffer);
   ctx.save();
-  const qrRadius = 8;
+  const qrRadius = 8 * 2; // Scaled for 2x resolution
   ctx.beginPath();
   ctx.moveTo(layout.qr.x + qrRadius, layout.qr.y);
   ctx.lineTo(layout.qr.x + layout.qr.size - qrRadius, layout.qr.y);
@@ -117,7 +126,13 @@ export async function drawIdCard({ templatePath, photoBuffer, qrBuffer, user }) 
 
   ctx.restore();
 
-  // Export
-  console.log('✅ ID card generated successfully');
-  return canvas.toBuffer('image/png');
+  // Export with maximum quality settings
+  console.log('✅ ID card generated successfully (2x resolution)');
+  return canvas.toBuffer('image/png', {
+    compressionLevel: 0,  // 0 = no compression, maximum quality
+    filters: canvas.PNG_FILTER_NONE,  // No filtering for best quality
+    palette: undefined,  // Full color, no palette
+    backgroundIndex: 0,
+    resolution: 300  // 300 DPI for print quality
+  });
 }
