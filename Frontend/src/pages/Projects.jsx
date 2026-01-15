@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Starfield from '../components/Starfield'
 import { useProjects, useProjectFilters, useMyProjects, useCreateProject } from '../hooks/useApi'
+import { Clock } from 'lucide-react'
 
 // Difficulty badge colors
 const difficultyColors = {
@@ -388,6 +389,8 @@ const Projects = () => {
   const navigate = useNavigate()
   const [selectedProject, setSelectedProject] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [timeLeft, setTimeLeft] = useState({})
+  const [isLocked, setIsLocked] = useState(false)
   const [filters, setFilters] = useState({
     page: 1,
     limit: 12,
@@ -403,6 +406,37 @@ const Projects = () => {
     if (storedUser) {
       setUser(JSON.parse(storedUser))
     }
+  }, [])
+
+  // Lockdown timer - 15th Jan 10 PM
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const lockdownTime = new Date(2026, 0, 15, 22, 0, 0).getTime() // Jan 15, 10 PM
+      const now = new Date().getTime()
+      const difference = lockdownTime - now
+
+      if (difference > 0) {
+        setIsLocked(false)
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        })
+      } else {
+        setIsLocked(true)
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        })
+      }
+    }
+
+    calculateTimeLeft()
+    const timer = setInterval(calculateTimeLeft, 1000)
+    return () => clearInterval(timer)
   }, [])
 
   const isMentorOrAdmin = user?.role === 'Mentor' || user?.role === 'Admin'
@@ -422,13 +456,59 @@ const Projects = () => {
   }
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-[#05070f] via-[#0a0f1e] to-[#05070f]">
+    <div className={`min-h-screen relative bg-gradient-to-br from-[#05070f] via-[#0a0f1e] to-[#05070f] ${isLocked ? 'blur-sm' : ''}`}>
       <Starfield />
 
-      <div className="relative z-10">
+      <div className={`relative z-10 ${isLocked ? 'opacity-50 pointer-events-none' : ''}`}>
         <Navbar />
 
         <main className="pt-20 sm:pt-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          {/* Lockdown Timer Overlay */}
+          {isLocked && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md">
+              <div className="text-center">
+                <Clock className="w-16 h-16 text-red-500 mx-auto mb-4" />
+                <h2 className="text-4xl font-bold text-white mb-2">Projects Locked</h2>
+                <p className="text-gray-300 mb-6">Submission deadline has passed</p>
+                <button
+                  onClick={() => navigate('/')}
+                  className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-lg hover:from-cyan-400 hover:to-blue-400 transition-all"
+                >
+                  Return to Home
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Lockdown Countdown Timer */}
+          {!isLocked && (
+            <div className="mb-12 p-6 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-2xl">
+              <div className="flex items-center gap-3 mb-4">
+                <Clock className="w-6 h-6 text-amber-400" />
+                <h3 className="text-xl font-bold text-amber-300">Project Submission Lockdown</h3>
+              </div>
+              <p className="text-gray-300 mb-4">Projects lock on January 15th at 10:00 PM. Hurry up!</p>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-black/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-amber-300">{String(timeLeft.days || 0).padStart(2, '0')}</div>
+                  <div className="text-xs text-gray-400 mt-1">Days</div>
+                </div>
+                <div className="bg-black/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-amber-300">{String(timeLeft.hours || 0).padStart(2, '0')}</div>
+                  <div className="text-xs text-gray-400 mt-1">Hours</div>
+                </div>
+                <div className="bg-black/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-amber-300">{String(timeLeft.minutes || 0).padStart(2, '0')}</div>
+                  <div className="text-xs text-gray-400 mt-1">Minutes</div>
+                </div>
+                <div className="bg-black/40 rounded-lg p-4 text-center">
+                  <div className="text-3xl font-bold text-amber-300">{String(timeLeft.seconds || 0).padStart(2, '0')}</div>
+                  <div className="text-xs text-gray-400 mt-1">Seconds</div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Header */}
           <header className="text-center mb-12">
             <p className="text-sm uppercase tracking-[0.35em] text-cyan-200/80 mb-2">Projects Dock</p>
