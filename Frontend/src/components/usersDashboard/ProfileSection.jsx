@@ -6,7 +6,7 @@ const roleColors = {
   admin: "bg-nebula-pink/20 text-nebula-pink",
 };
 
-export function ProfileSection({ user, rank, isLoading }) {
+export function ProfileSection({ user, rank, isLoading, onGenerateIDCard }) {
   if (isLoading) {
     return (
       <div className="glass-card p-6 animate-pulse">
@@ -62,11 +62,19 @@ export function ProfileSection({ user, rank, isLoading }) {
             </span>
           </div>
 
-          <div className="flex items-center justify-center md:justify-start gap-3">
+          <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium capitalize ${roleColors[user.role]}`}>
               <Shield className="w-3.5 h-3.5" />
               {user.role}
             </span>
+            {onGenerateIDCard && (
+              <button
+                onClick={onGenerateIDCard}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:shadow-cyan-500/50 hover:from-cyan-600 hover:to-cyan-700 shadow-lg transition-all duration-200"
+              >
+                🎫 Generate ID Card
+              </button>
+            )}
           </div>
         </div>
 
