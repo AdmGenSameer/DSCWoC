@@ -405,7 +405,7 @@ const GenerateId = () => {
               </div>
             </div>
           </div>
-        </main>flex flex-col max-h-[calc(100vh-2
+        </main>
       </div>
 
       {/* Preview Modal */}
