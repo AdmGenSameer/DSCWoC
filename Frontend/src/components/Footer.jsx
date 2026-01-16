@@ -1,4 +1,5 @@
 import { Github, Linkedin, Mail, Instagram } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const quickLinkColumns = [
   ['Home', 'About', 'Timeline'],
@@ -31,7 +32,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-white font-semibold mt- 10 mb-10">Quick Links</h3>
-            <div className="grid grid-cols-2 gap-x-8">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               {quickLinkColumns.map((column, colIndex) => (
                 <ul key={colIndex} className="space-y-2">
                   {column.map((item) => (
@@ -46,6 +47,17 @@ const Footer = () => {
                   ))}
                 </ul>
               ))}
+              {/* Our Team - Glowing CTA Button */}
+              <div className="col-span-2 flex justify-center mt-4">
+                <Link
+                  to="/team"
+                  className="relative px-8 py-3 bg-gradient-to-r from-cosmic-purple to-purple-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <div className="absolute inset-0 blur-lg bg-cosmic-purple/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                  <span className="relative z-10">Our Team</span>
+                </Link>
+              </div>
             </div>
           </div>
 

@@ -29,6 +29,7 @@ import Guidelines from './pages/Guidelines';
 import Resources from './pages/Resources';
 import GenerateId from './pages/GenerateId';
 import Verify from './pages/Verify';
+import Team from './pages/Team';
 
 // Loading fallback component
 const AnimationFallback = () => (
@@ -176,6 +177,7 @@ function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/generate-id" element={<GenerateId />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="/team" element={<Team />} />
       </Routes>
     </Router>
   );
