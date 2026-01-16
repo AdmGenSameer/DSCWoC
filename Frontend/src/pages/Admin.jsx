@@ -46,6 +46,20 @@ const Admin = () => {
   const [user, setUser] = useState(null);
   const [authState, setAuthState] = useState('checking'); // 'checking', 'not_logged_in', 'not_admin', 'authorized'
   const [accessError, setAccessError] = useState('');
+  const [toast, setToast] = useState(null); // { type: 'success'|'error', message }
+  const [confirmDialog, setConfirmDialog] = useState(null); // { title, message, onConfirm, onCancel }
+
+  // Toast auto-dismiss
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
+  const showToast = (type, message) => {
+    setToast({ type, message });
+  };
 
   // Check authentication on mount
   useEffect(() => {
@@ -414,6 +428,7 @@ const Admin = () => {
               { id: 'overview', label: 'Overview', icon: TrendingUp },
               { id: 'import', label: 'Import Projects', icon: Upload },
               { id: 'users', label: 'Users', icon: Users },
+              { id: 'idcards', label: 'ID Cards', icon: Shield },
               { id: 'projects', label: 'Projects', icon: FolderGit2 },
               { id: 'prs', label: 'Pull Requests', icon: GitPullRequest },
               { id: 'contacts', label: 'Contacts', icon: Mail },
@@ -437,11 +452,49 @@ const Admin = () => {
           {activeTab === 'overview' && overview && <OverviewSection data={overview} />}
           {activeTab === 'import' && <ImportSection getAuthToken={getAuthToken} onSuccess={fetchProjects} />}
           {activeTab === 'users' && <UsersSection users={users} onRefresh={fetchUsers} />}
+          {activeTab === 'idcards' && <IdCardsSection getAuthToken={getAuthToken} showToast={showToast} showConfirm={(title, message, onConfirm) => setConfirmDialog({ title, message, onConfirm, onCancel: () => setConfirmDialog(null) })} />}
           {activeTab === 'projects' && <ProjectsSection projects={projects} onRefresh={fetchProjects} />}
           {activeTab === 'prs' && <PRsSection prs={prs} onRefresh={fetchPRs} />}
           {activeTab === 'contacts' && <ContactsSection contacts={contacts} onRefresh={fetchContacts} />}
         </main>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 transition-all duration-300 ${
+          toast.type === 'success' ? 'bg-green-500/20 border border-green-500/50 text-green-300' : 'bg-red-500/20 border border-red-500/50 text-red-300'
+        }`}>
+          {toast.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+          <p className="text-sm font-medium">{toast.message}</p>
+        </div>
+      )}
+
+      {/* Confirmation Dialog */}
+      {confirmDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-slate-900 border border-white/10 rounded-xl p-6 max-w-sm shadow-xl">
+            <h3 className="text-white font-semibold mb-2">{confirmDialog.title}</h3>
+            <p className="text-gray-300 text-sm mb-6">{confirmDialog.message}</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={confirmDialog.onCancel}
+                className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  confirmDialog.onConfirm();
+                  setConfirmDialog(null);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -664,6 +717,242 @@ StreamVerse,https://github.com/Abhishekhack2909/StreamVerse,A streaming platform
   );
 };
 
+
+// ID Cards Section Component
+const IdCardsSection = ({ getAuthToken, showToast, showConfirm }) => {
+  const [query, setQuery] = useState('');
+  const [lookupLoading, setLookupLoading] = useState(false);
+  const [foundUser, setFoundUser] = useState(null);
+  const [graceLoading, setGraceLoading] = useState(false);
+  const [genLoading, setGenLoading] = useState(false);
+  const [linkedinId, setLinkedinId] = useState('');
+  const [photoFile, setPhotoFile] = useState(null);
+
+  const doLookup = async () => {
+    if (!query.trim()) return;
+    setLookupLoading(true);
+    setFoundUser(null);
+    try {
+      const isEmail = query.includes('@');
+      const url = isEmail
+        ? `${API_BASE_URL}/admin/users/lookup?email=${encodeURIComponent(query.trim())}`
+        : `${API_BASE_URL}/admin/users/lookup?github=${encodeURIComponent(query.trim())}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Lookup failed');
+      setFoundUser(data.data?.user || null);
+      setLinkedinId((data.data?.user?.linkedinUrl || '').split('/').pop() || '');
+      showToast('success', 'User found');
+    } catch (err) {
+      showToast('error', err.message);
+    } finally {
+      setLookupLoading(false);
+    }
+  };
+
+  const grantGrace = async (action = 'decrement') => {
+    if (!foundUser) return;
+    
+    if (action === 'reset') {
+      showConfirm(
+        'Reset ID Card Count',
+        `Reset ID card generation count to 0 for ${foundUser.fullName}? This allows them to generate 2 new cards.`,
+        () => performGrace(action)
+      );
+    } else {
+      performGrace(action);
+    }
+  };
+
+  const performGrace = async (action) => {
+    setGraceLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/id/grace`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ email: foundUser.email, action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Grace failed');
+      const after = data.data?.idGeneratedCountAfter ?? foundUser.idGeneratedCount;
+      setFoundUser({ ...foundUser, idGeneratedCount: after });
+      showToast('success', `ID count ${action === 'reset' ? 'reset to 0' : 'decremented'}`);
+    } catch (err) {
+      showToast('error', err.message);
+    } finally {
+      setGraceLoading(false);
+    }
+  };
+
+  const generateId = async () => {
+    if (!foundUser || !photoFile || !linkedinId.trim()) {
+      showToast('error', 'Provide LinkedIn ID and photo');
+      return;
+    }
+    setGenLoading(true);
+    try {
+      const fd = new FormData();
+      fd.append('photo', photoFile);
+      fd.append('email', foundUser.email);
+      fd.append('linkedinId', linkedinId.trim());
+      fd.append('name', foundUser.fullName || '');
+      if (foundUser.github_id) fd.append('githubId', foundUser.github_id);
+
+      const res = await fetch(`${API_BASE_URL}/admin/id/generate`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+        body: fd,
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.message || 'Generation failed');
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DSCWoC_2026_${foundUser.role}_Card.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      const newCount = (foundUser.idGeneratedCount || 0) + 1;
+      setFoundUser({ ...foundUser, idGeneratedCount: newCount });
+      showToast('success', 'ID card generated and downloaded');
+    } catch (err) {
+      showToast('error', err.message);
+    } finally {
+      setGenLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+        <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
+          <Shield className="w-5 h-5" />
+          ID Card Tools
+        </h3>
+        <div className="flex gap-3">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by email or GitHub username"
+            className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-red-500"
+          />
+          <button
+            onClick={doLookup}
+            disabled={lookupLoading || !query.trim()}
+            className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-lg disabled:opacity-50"
+          >
+            {lookupLoading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+      </div>
+
+      {foundUser && (
+        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <img src={foundUser.avatar_url} alt={foundUser.fullName} className="w-10 h-10 rounded-full" />
+              <div>
+                <p className="text-white font-medium">{foundUser.fullName}</p>
+                <p className="text-gray-400 text-sm">{foundUser.email} · @{foundUser.github_username}</p>
+              </div>
+            </div>
+            <span className={`px-2 py-1 rounded text-xs font-medium ${
+              foundUser.role === 'Admin' ? 'bg-red-500/20 text-red-300' :
+              foundUser.role === 'Mentor' ? 'bg-blue-500/20 text-blue-300' :
+              'bg-green-500/20 text-green-300'
+            }`}>{foundUser.role}</span>
+          </div>
+
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-black/30 border border-white/10 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">ID Cards Generated</p>
+              <p className="text-white text-2xl font-bold">{foundUser.idGeneratedCount || 0}</p>
+            </div>
+            <div className="bg-black/30 border border-white/10 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">Auth Key</p>
+              <p className="text-white text-sm">{foundUser.authKey || '—'}</p>
+            </div>
+            <div className="bg-black/30 border border-white/10 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">LinkedIn</p>
+              <p className="text-white text-sm">{foundUser.linkedinUrl || '—'}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Grace Retry */}
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+              <h4 className="text-white font-semibold mb-3 flex items-center gap-2"><RefreshCw className="w-4 h-4" /> Grace Retry</h4>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => grantGrace('decrement')}
+                  disabled={graceLoading}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg disabled:opacity-50"
+                >
+                  {graceLoading ? 'Applying...' : 'Decrement by 1'}
+                </button>
+                <button
+                  onClick={() => grantGrace('reset')}
+                  disabled={graceLoading}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg disabled:opacity-50"
+                >
+                  Reset to 0
+                </button>
+              </div>
+            </div>
+
+            {/* Generate ID Card */}
+            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+              <h4 className="text-white font-semibold mb-3 flex items-center gap-2"><Upload className="w-4 h-4" /> Generate ID Card</h4>
+              <div className="space-y-3">
+                <input
+                  value={foundUser.fullName || ''}
+                  readOnly
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm"
+                />
+                <input
+                  value={foundUser.email || ''}
+                  readOnly
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm"
+                />
+                <input
+                  value={linkedinId}
+                  onChange={(e) => setLinkedinId(e.target.value)}
+                  placeholder="LinkedIn ID (username) or full URL"
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm"
+                />
+                <input
+                  type="file"
+                  accept="image/png, image/jpeg"
+                  onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                  className="w-full text-sm text-gray-300"
+                />
+                <button
+                  onClick={generateId}
+                  disabled={genLoading || !photoFile || !linkedinId.trim()}
+                  className="w-full py-2 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white rounded-lg disabled:opacity-50"
+                >
+                  {genLoading ? 'Generating...' : 'Generate & Download'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Overview Section Component
 const OverviewSection = ({ data }) => {

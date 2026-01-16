@@ -50,11 +50,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
-    yearOfStudy: {
-      type: Number,
-      min: 1,
-      max: 5,
-    },
     
     // Role-based access control
     role: {
