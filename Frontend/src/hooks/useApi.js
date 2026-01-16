@@ -288,6 +288,31 @@ export const useUserDashboardData = (options = {}) => {
   });
 };
 
+/**
+ * Fetch User Joined Project Data
+ */
+export const useUserJoinedProjects = (userid, options = {}) => {
+  const { enabled = true } = options;
+
+  return useQuery({
+    queryKey: ['userJoinedProjects', userid],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/pull-requests/joinedprojects/${userid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) throw new Error('Unauthorized');
+      if (!response.ok) throw new Error('Failed to fetch user joined projects');
+      return response.json();
+    },
+    enabled: enabled && !!userid,
+    staleTime: 15 * 60 * 1000, // User dashboard data changes infrequently
+    gcTime: 20 * 60 * 1000,
+  });
+};
+
 
 
 /**
