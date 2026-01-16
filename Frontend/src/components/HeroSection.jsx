@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import EventCountdown from './EventCountdown';
 
 
 const HeroSection = () => {
