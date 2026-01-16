@@ -198,12 +198,20 @@ const Navbar = () => {
         {/* Desktop User Section */}
         <div className="hidden md:flex items-center space-x-4">
           {user && (
-            <button
-              onClick={handleLogout}
-              className="retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-nebula-pink/40 hover:-translate-y-0.5 cosmic-glow"
-            >
-              LOGOUT
-            </button>
+            <>
+              <button
+                onClick={handleDashboardClick}
+                className="retro-button border-2 border-cosmic-purple text-white hover:bg-cosmic-purple/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/40 hover:-translate-y-0.5 cosmic-glow"
+              >
+                DASHBOARD
+              </button>
+              <button
+                onClick={handleLogout}
+                className="retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-nebula-pink/40 hover:-translate-y-0.5 cosmic-glow"
+              >
+                LOGOUT
+              </button>
+            </>
           )}
         </div>
       </div>
@@ -233,7 +241,13 @@ const Navbar = () => {
               ))}
 
               {user && (
-                <div className="pt-3 border-t border-white/10">
+                <div className="pt-3 border-t border-white/10 space-y-3">
+                  <button
+                    onClick={handleDashboardClick}
+                    className="w-full retro-button border-2 border-cosmic-purple text-white hover:bg-cosmic-purple/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
+                  >
+                    DASHBOARD
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="w-full retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
