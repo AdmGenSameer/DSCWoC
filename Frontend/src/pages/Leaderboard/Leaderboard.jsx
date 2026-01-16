@@ -15,7 +15,6 @@ const Starfield = lazy(() => import('../../components/Starfield'));
 const ITEMS_PER_PAGE = 30;
 const LAUNCH_DATE = new Date('2026-01-18T06:30:00Z'); // 12:00 PM IST
 
-
 const formatLeaderboardDateTime = (date) => {
     try {
         const formatted = new Intl.DateTimeFormat('en-IN', {
