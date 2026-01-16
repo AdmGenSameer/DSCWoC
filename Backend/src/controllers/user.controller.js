@@ -131,7 +131,7 @@ export const updateUser = asyncHandler(async (req, res) => {
   }
 
   // Allowed fields for update
-  const allowedFields = ['fullName', 'bio', 'college', 'yearOfStudy'];
+  const allowedFields = ['fullName', 'bio', 'college'];
   const updateData = {};
 
   allowedFields.forEach(field => {
