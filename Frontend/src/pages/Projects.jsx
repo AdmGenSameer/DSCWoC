@@ -408,10 +408,10 @@ const Projects = () => {
     }
   }, [])
 
-  // Lockdown timer - 15th Jan 10 PM
+  // Lockdown timer - 16th Jan 10 PM
   useEffect(() => {
     const calculateTimeLeft = () => {
-      const lockdownTime = new Date(2026, 0, 15, 22, 0, 0).getTime() // Jan 15, 10 PM
+      const lockdownTime = new Date(2026, 0, 16, 22, 0, 0).getTime() // Jan 16, 10 PM
       const now = new Date().getTime()
       const difference = lockdownTime - now
 
