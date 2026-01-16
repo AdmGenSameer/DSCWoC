@@ -265,15 +265,9 @@ const About = () => {
               <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
                 Ready to Join the Journey?
               </h3>
-              <p className="text-sm text-gray-300 mb-4">
+              <p className="text-sm text-gray-300">
                 Start your open-source adventure with DSC Winter of Code today. No experience necessary, just enthusiasm!
               </p>
-              <button
-                onClick={() => navigate('/Dashboard')}
-                className="retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink hover:from-galaxy-violet hover:to-nebula-pink text-white px-8 py-2.5 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/50 hover:-translate-y-0.5 text-sm"
-              >
-                Explore DSCWoC
-              </button>
             </div>
           </section>
         </main>

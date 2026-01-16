@@ -266,26 +266,26 @@ export default function Resources() {
     <div className="min-h-screen bg-space-black relative overflow-x-hidden">
       <Starfield />
       <Navbar />
-      <main className=" container mx-auto px-4 py-10 relative z-10">
+      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10">
         {/* Hero Section */}
         <div className="pt-1 md:pt-10"></div>
-        <div className="text-center mb-12 animate-fade-in-up pt-14">
+        <div className="text-center mb-8 sm:mb-12 animate-fade-in-up pt-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cosmic-purple/10 border border-cosmic-purple/30 mb-6 shadow-lg shadow-cosmic-purple/10">
             <BookOpen className="w-4 h-4 text-cosmic-purple" />
             <span className="text-sm font-medium text-cosmic-purple">Learning Resources</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-stellar-cyan via-nebula-pink to-galaxy-violet animate-shimmer">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-transparent bg-clip-text bg-gradient-to-r from-stellar-cyan via-nebula-pink to-galaxy-violet animate-shimmer">
             Start Your Journey
           </h1>
-          <p className="text-nebula-blue max-w-2xl mx-auto text-lg">
+          <p className="text-nebula-blue max-w-2xl mx-auto text-base sm:text-lg px-4">
             Curated resources to help you become a successful open-source contributor.<br />
             From Git basics to advanced programming concepts.
           </p>
         </div>
 
         {/* Search Bar */}
-        <div className="relative max-w-md mx-auto mb-8">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-nebula-blue" />
+        <div className="relative max-w-md mx-auto mb-6 sm:mb-8 px-2 sm:px-0">
+          <Search className="absolute left-5 sm:left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-nebula-blue" />
           <Input
             placeholder="Search resources..."
             value={searchQuery}
@@ -295,7 +295,7 @@ export default function Resources() {
         </div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
+        <div className="flex flex-wrap justify-center gap-2 mb-8 sm:mb-12 px-2 sm:px-0">
           {categories.map((category) => {
             const Icon = category.icon;
             const isActive = activeCategory === category.id;
@@ -304,7 +304,7 @@ export default function Resources() {
                 key={category.id}
                 onClick={() => setActiveCategory(category.id)}
                 className={`
-                  flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
+                  flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-300
                   border
                   ${isActive
                     ? "bg-gradient-to-r  text-white border-cosmic-purple shadow-lg shadow-cosmic-purple/25 animate-glow"
@@ -312,8 +312,8 @@ export default function Resources() {
                   }
                 `}
               >
-                <Icon className="w-4 h-4" />
-                {category.label}
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="whitespace-nowrap">{category.label}</span>
               </button>
             );
           })}
@@ -321,18 +321,18 @@ export default function Resources() {
 
         {/* Video Resources Section */}
         {videoResources.length > 0 && (
-          <section className="mb-16">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-supernova-orange/20 shadow-md shadow-supernova-orange/10">
-                <PlayCircle className="w-5 h-5 text-supernova-orange" />
+          <section className="mb-12 sm:mb-16">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 px-2 sm:px-0">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-supernova-orange/20 shadow-md shadow-supernova-orange/10">
+                <PlayCircle className="w-4 h-4 sm:w-5 sm:h-5 text-supernova-orange" />
               </div>
-              <h2 className="text-2xl font-bold text-white">Video Tutorials</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Video Tutorials</h2>
               <span className="px-2 py-1 text-xs font-medium rounded-full bg-midnight-blue text-nebula-blue">
                 {videoResources.length} videos
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {videoResources.map((resource, index) => (
                 <a
                   key={resource.id}
@@ -368,16 +368,16 @@ export default function Resources() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4">
-                    <h3 className="font-semibold text-white mb-2 line-clamp-2 group-hover:text-stellar-cyan transition-colors">
+                  <div className="p-3 sm:p-4">
+                    <h3 className="font-semibold text-sm sm:text-base text-white mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-stellar-cyan transition-colors">
                       {resource.title}
                     </h3>
-                    <p className="text-sm text-nebula-blue line-clamp-2 mb-3">
+                    <p className="text-xs sm:text-sm text-nebula-blue line-clamp-2 mb-2 sm:mb-3">
                       {resource.description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-nebula-blue">{resource.author}</span>
-                      <span className="text-xs px-2 py-1 rounded-full bg-stellar-cyan/10 text-stellar-cyan capitalize">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-nebula-blue truncate">{resource.author}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-stellar-cyan/10 text-stellar-cyan capitalize whitespace-nowrap flex-shrink-0">
                         {resource.category}
                       </span>
                     </div>
@@ -390,41 +390,41 @@ export default function Resources() {
 
         {/* Document Resources Section */}
         {documentResources.length > 0 && (
-          <section className="mb-16">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-cosmos-indigo/20 shadow-md shadow-cosmos-indigo/10">
-                <FileText className="w-5 h-5 text-cosmos-indigo" />
+          <section className="mb-12 sm:mb-16">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 px-2 sm:px-0">
+              <div className="p-1.5 sm:p-2 rounded-lg bg-cosmos-indigo/20 shadow-md shadow-cosmos-indigo/10">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-cosmos-indigo" />
               </div>
-              <h2 className="text-2xl font-bold text-white">Documentation & Guides</h2>
+              <h2 className="text-xl sm:text-2xl font-bold text-white">Documentation & Guides</h2>
               <span className="px-2 py-1 text-xs font-medium rounded-full bg-midnight-blue text-nebula-blue">
                 {documentResources.length} docs
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {documentResources.map((resource, index) => (
                 <a
                   key={resource.id}
                   href={resource.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-start gap-4 p-5 bg-midnight-blue/80 rounded-xl border border-galaxy-violet/30 hover:border-stellar-cyan/60 transition-all duration-300 hover:shadow-xl hover:shadow-stellar-cyan/10 animate-fade-in-up"
+                  className="group flex items-start gap-3 sm:gap-4 p-4 sm:p-5 bg-midnight-blue/80 rounded-xl border border-galaxy-violet/30 hover:border-stellar-cyan/60 transition-all duration-300 hover:shadow-xl hover:shadow-stellar-cyan/10 animate-fade-in-up"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-cosmic-purple/20 to-nebula-blue/20 group-hover:from-cosmic-purple/30 group-hover:to-nebula-blue/30 transition-colors">
-                    <FileText className="w-6 h-6 text-cosmic-purple" />
+                  <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-cosmic-purple/20 to-nebula-blue/20 group-hover:from-cosmic-purple/30 group-hover:to-nebula-blue/30 transition-colors flex-shrink-0">
+                    <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-cosmic-purple" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white mb-1 group-hover:text-stellar-cyan transition-colors flex items-center gap-2">
-                      {resource.title}
-                      <ExternalLink className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <h3 className="font-semibold text-sm sm:text-base text-white mb-1 group-hover:text-stellar-cyan transition-colors flex items-center gap-2">
+                      <span className="truncate">{resource.title}</span>
+                      <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
                     </h3>
-                    <p className="text-sm text-nebula-blue line-clamp-2 mb-2">
+                    <p className="text-xs sm:text-sm text-nebula-blue line-clamp-2 mb-2">
                       {resource.description}
                     </p>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-nebula-blue">{resource.author}</span>
-                      <span className="text-xs px-2 py-1 rounded-full bg-galaxy-violet/10 text-galaxy-violet capitalize">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className="text-xs text-nebula-blue truncate">{resource.author}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-galaxy-violet/10 text-galaxy-violet capitalize whitespace-nowrap flex-shrink-0">
                         {resource.category}
                       </span>
                     </div>
@@ -449,20 +449,13 @@ export default function Resources() {
         )}
 
         {/* Footer CTA */}
-        <div className="mt-16 text-center p-8 rounded-2xl bg-gradient-to-br from-cosmic-purple/10 via-nebula-blue/10 to-stellar-cyan/10 border border-cosmic-purple/20 shadow-lg shadow-cosmic-purple/10">
-          <h3 className="text-2xl font-bold text-white mb-3">
+        <div className="mt-12 sm:mt-16 text-center p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-cosmic-purple/10 via-nebula-blue/10 to-stellar-cyan/10 border border-cosmic-purple/20 shadow-lg shadow-cosmic-purple/10">
+          <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">
             Ready to Start Contributing?
           </h3>
-          <p className="text-nebula-blue mb-6 max-w-xl mx-auto">
+          <p className="text-sm sm:text-base text-nebula-blue max-w-xl mx-auto px-4">
             Put your knowledge into practice. Join Winter of Code and start making your first contributions today!
           </p>
-          <a
-            href="/dashboard"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cosmic-purple text-white font-medium hover:opacity-90 transition-opacity shadow-lg shadow-cosmic-purple/25"
-          >
-            <Rocket className="w-5 h-5" />
-            Go to Dashboard
-          </a>
         </div>
       </main>
     </div>
