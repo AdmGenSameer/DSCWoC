@@ -125,7 +125,7 @@ const Rewards = () => {
                 <div className="space-y-6">
                   <div>
                     <div className="text-5xl sm:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cosmic-purple via-nebula-pink to-stellar-cyan mb-2">
-                      ₹ XX,XXX+
+                      ₹ 50,000+
                     </div>
                     <p className="text-gray-300 text-lg">
                       Worth of rewards, credits & opportunities
@@ -310,15 +310,9 @@ const Rewards = () => {
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
                 Ready to Earn Your Rewards?
               </h3>
-              <p className="text-gray-300 mb-6">
+              <p className="text-gray-300">
                 Start contributing to DSC Winter of Code today and watch your achievements unlock!
               </p>
-              <button
-                onClick={() => navigate('/Dashboard')}
-                className="retro-button bg-gradient-to-r from-cosmic-purple to-nebula-pink hover:from-galaxy-violet hover:to-nebula-pink text-white px-8 py-3 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/50 hover:-translate-y-0.5"
-              >
-                Start Contributing Now
-              </button>
             </div>
           </section>
         </main>
