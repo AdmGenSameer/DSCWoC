@@ -23,11 +23,7 @@ const Navbar = () => {
     if (!user) return '/login';
     switch (user.role) {
       case 'Admin':
-<<<<<<< HEAD
-        return '/admin';
-=======
         return '/admin1';
->>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
       case 'Mentor':
         return '/mentor/dashboard';
       default:
@@ -218,10 +214,9 @@ const Navbar = () => {
             </svg>
           )}
         </button>
-<<<<<<< HEAD
 
         {/* Desktop Navigation Links */}
-        <div className="hidden md:flex items-center space-x-6">
+        <div className="hidden md:flex items-center space-x-6 flex-1 justify-center">
           {navItems.map((item) => (
             <button
               key={item.name}
@@ -252,8 +247,42 @@ const Navbar = () => {
             </button>
           )}
         </div>
-=======
->>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
+
+          {user && (
+            <>
+              <button
+                onClick={handleDashboardClick}
+                className="retro-button border-2 border-cosmic-purple text-white hover:bg-cosmic-purple/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/40 hover:-translate-y-0.5 cosmic-glow"
+              >
+                DASHBOARD
+              </button>
+              <button
+                onClick={handleLogout}
+                className="retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-nebula-pink/40 hover:-translate-y-0.5 cosmic-glow"
+              >
+                LOGOUT
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden text-white p-2 hover:text-cosmic-purple transition-colors"
+          aria-label="Toggle menu"
+        >
+          {mobileMenuOpen ? (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+
       </div>
 
       {mobileMenuOpen && (
@@ -279,19 +308,11 @@ const Navbar = () => {
                 </button>
               ))}
 
-<<<<<<< HEAD
               {user ? (
                 <div className="pt-3 border-t border-white/10">
                   <button
                     onClick={handleLogout}
                     className="w-full retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
-=======
-              {user && (
-                <div className="pt-3 border-t border-white/10 space-y-3">
-                  <button
-                    onClick={handleDashboardClick}
-                    className="w-full retro-button border-2 border-cosmic-purple text-white hover:bg-cosmic-purple/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
->>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
                   >
                     LOGOUT
                   </button>
@@ -302,10 +323,6 @@ const Navbar = () => {
                     LOGOUT
                   </button>
                 </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 82a31d45401af63b50ecb924e367fd98151b1215
               ) : (
                 <button
                   onClick={handleDashboardClick}
@@ -313,11 +330,7 @@ const Navbar = () => {
                 >
                   DASHBOARD
                 </button>
-<<<<<<< HEAD
-=======
->>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
-=======
->>>>>>> 82a31d45401af63b50ecb924e367fd98151b1215
+
               )}
             </div>
           </div>
