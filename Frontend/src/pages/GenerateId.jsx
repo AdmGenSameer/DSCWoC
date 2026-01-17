@@ -3,11 +3,31 @@ import { useNavigate } from 'react-router-dom';
 import Starfield from '../components/Starfield';
 import { Loader2, Download, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+<<<<<<< HEAD
 // Use localhost for development, Railway for production
 const API_BASE = import.meta.env.VITE_API_URL ||
   (window.location.hostname === 'localhost'
     ? 'http://localhost:5000/api/v1'
     : 'https://dscwoc-production.up.railway.app/api/v1');
+=======
+// Use Railway production backend or localhost for development
+const API_BASE = (() => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
+  
+  if (envUrl) {
+    // Use the environment variable if set
+    return envUrl.endsWith('/api/v1') ? envUrl : `${envUrl}/v1`;
+  }
+  
+  // For production deployed on Railway
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return 'https://dscwoc-production.up.railway.app/api/v1';
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:5000/api/v1';
+})();
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
 
 // Utility functions for input sanitization and URL extraction
 const sanitizeInput = (input) => {
@@ -68,6 +88,7 @@ const GenerateId = () => {
   const [idCardImage, setIdCardImage] = useState('');
   const [detectedRole, setDetectedRole] = useState('');
   const [generationsLeft, setGenerationsLeft] = useState(2);
+  const [downloading, setDownloading] = useState(false);
 
   const onFileChange = (e) => {
     setFile(e.target.files?.[0] || null);
@@ -184,13 +205,24 @@ const GenerateId = () => {
     }
   };
 
-  const handleDownload = () => {
-    const a = document.createElement('a');
-    a.href = idCardImage;
-    a.download = `DSCWoC_2026_${detectedRole || 'ID'}_Card.png`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      // Small delay to show feedback
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const a = document.createElement('a');
+      a.href = idCardImage;
+      a.download = `DSCWoC_2026_${detectedRole || 'ID'}_Card.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      
+      // Keep loading state for a moment so user sees the feedback
+      await new Promise(resolve => setTimeout(resolve, 300));
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handleClosePreview = useCallback(() => {
@@ -382,6 +414,13 @@ const GenerateId = () => {
                       </>
                     )}
                   </button>
+
+                  {loading && (
+                    <div className="rounded-lg bg-cyan-500/10 border border-cyan-500/30 px-4 py-3 text-sm text-cyan-200 flex items-center gap-3 animate-pulse">
+                      <Loader2 className="w-5 h-5 animate-spin flex-shrink-0" />
+                      <span>Your ID card is being generated, please wait...</span>
+                    </div>
+                  )}
                 </form>
               </div>
             </div>
@@ -410,7 +449,11 @@ const GenerateId = () => {
               </button>
 
               {/* Header */}
+<<<<<<< HEAD
               <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-b border-cyan-500/30 px-8 py-6">
+=======
+              <div className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-b border-cyan-500/30 px-8 py-6 flex-shrink-0">
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
                 <div>
                   <h2 className="text-2xl font-bold text-white">Your ID Card is Ready!</h2>
                   <p className="text-cyan-400 text-sm mt-1">
@@ -421,17 +464,27 @@ const GenerateId = () => {
               </div>
 
               {/* ID Card Preview */}
+<<<<<<< HEAD
               <div className="p-8 overflow-hidden">
                 <div className="relative bg-white/5 rounded-xl p-4 border border-white/10 max-h-[calc(100vh-16rem)] overflow-hidden">
                   <img
                     src={idCardImage}
                     alt="Generated ID Card"
                     className="w-full h-auto rounded-lg shadow-2xl object-contain max-h-[calc(100vh-18rem)]"
+=======
+              <div className="p-8 overflow-y-auto flex-1">
+                <div className="relative bg-white/5 rounded-xl p-4 border border-white/10">
+                  <img
+                    src={idCardImage}
+                    alt="Generated ID Card"
+                    className="w-full h-auto rounded-lg shadow-2xl object-contain"
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
                   />
                 </div>
               </div>
 
               {/* Actions */}
+<<<<<<< HEAD
               <div className="border-t border-white/10 px-8 py-6 flex gap-4">
                 <button
                   onClick={handleDownload}
@@ -439,6 +492,25 @@ const GenerateId = () => {
                 >
                   <Download className="w-5 h-5" />
                   Download High Quality PNG
+=======
+              <div className="border-t border-white/10 px-8 py-6 flex gap-4 flex-shrink-0">
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="flex-1 inline-flex justify-center items-center gap-2 rounded-lg bg-gradient-to-r from-cyan-500 to-cyan-600 px-6 py-3 font-semibold text-white shadow-lg hover:shadow-cyan-500/50 hover:from-cyan-600 hover:to-cyan-700 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none transition-all duration-200"
+                >
+                  {downloading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Downloading...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-5 h-5" />
+                      Download High Quality PNG
+                    </>
+                  )}
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
                 </button>
               </div>
             </div>

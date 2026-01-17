@@ -13,7 +13,7 @@ const Starfield = lazy(() => import('../../components/Starfield'));
 
 // Constants for pagination
 const ITEMS_PER_PAGE = 30;
-const LAUNCH_DATE = new Date('2026-01-16T15:30:00Z'); // 9:00 PM IST
+const LAUNCH_DATE = new Date('2026-01-18T06:30:00Z'); // 12:00 PM IST
 
 const formatLeaderboardDateTime = (date) => {
     try {
@@ -225,7 +225,7 @@ const Leaderboard = () => {
                                 <div className="ship-pill">Status • Locked</div>
                                 <p className="ship-subtitle">Leaderboard launch sequence engaged</p>
                                 <h2 className="ship-title">Launch in</h2>
-                                <p className="ship-meta">Goes live on 16 Jan, 9:00 PM IST</p>
+                                <p className="ship-meta">Goes live on 18 Jan, 9:00 PM IST</p>
                             </div>
 
                             <div className="ship-countdown">

@@ -1,6 +1,4 @@
-import mongoose from 'mongoose';
 import User from '../models/User.model.js';
-import Badge from '../models/Badge.model.js';
 import PullRequest from '../models/PullRequest.model.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 import { successResponse, paginatedResponse } from '../utils/response.js';
@@ -133,7 +131,7 @@ export const updateUser = asyncHandler(async (req, res) => {
   }
 
   // Allowed fields for update
-  const allowedFields = ['fullName', 'bio', 'college', 'yearOfStudy'];
+  const allowedFields = ['fullName', 'bio', 'college'];
   const updateData = {};
 
   allowedFields.forEach(field => {

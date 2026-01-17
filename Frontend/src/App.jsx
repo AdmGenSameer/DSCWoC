@@ -146,6 +146,7 @@ const Home = () => {
             <div ref={ctaRef} className="min-h-[420px]">
               {ctaVisible ? <CTASection /> : <SectionSkeleton className="h-[420px]" />}
             </div>
+
             <Footer />
           </div>
         </div>
@@ -163,7 +164,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/dashboard" element={<UsersDashboard />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin1" element={<Admin />} />
         <Route path="/mentor/dashboard" element={<Dashboard />} />
         <Route path="/about" element={<About />} />
         <Route path="/rewards" element={<Rewards />} />

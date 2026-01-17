@@ -24,11 +24,29 @@ const AuthCallback = () => {
         }
 
         // Send the session to our backend to create/update user
-        const rawApiUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL
-        const apiUrl = rawApiUrl
-          ? String(rawApiUrl).replace(/\/+$/, '').replace(/\/api(?:\/v1)?$/, '')
-          : 'http://localhost:5000'
-        console.log('Calling backend API:', apiUrl)
+        const getApiUrl = () => {
+          const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL
+          
+          console.log('Environment check:', {
+            VITE_API_URL: import.meta.env.VITE_API_URL,
+            VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL,
+            hostname: window.location.hostname,
+            envUrl: envUrl
+          })
+          
+          if (envUrl) {
+            return String(envUrl).replace(/\/+$/, '').replace(/\/api(?:\/v1)?$/, '')
+          }
+          
+          // For production deployed on Railway
+          if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            return 'https://dscwoc-production.up.railway.app'
+          }
+          
+          return 'http://localhost:5000'
+        }
+        const apiUrl = getApiUrl()
+        console.log('Final API URL:', apiUrl)
         
         // Get the intended role from localStorage (set during login)
         const intendedRole = localStorage.getItem('intended_role') || 'contributor'
@@ -85,11 +103,11 @@ const AuthCallback = () => {
               // User tried admin login but is not an admin
               setError(`Access Denied: You are logged in as "${result.data.user.role}". Only Administrators can access the admin panel.`)
               setLoading(false)
-              setTimeout(() => navigate('/admin'), 3000)
+              setTimeout(() => navigate('/admin1'), 3000)
               return
             }
             // Admin user - go to admin panel
-            navigate('/admin')
+            navigate('/admin1')
             return
           }
           
@@ -108,14 +126,17 @@ const AuthCallback = () => {
           if (intendedRole === 'contributor') {
             if (result.data.user.role === 'Mentor' || result.data.user.role === 'Admin') {
               // Mentor/Admin tried contributor login - that's fine, redirect to their dashboard
-              const redirectUrl = result.data.user.role === 'Admin' ? '/admin' : '/mentor/dashboard'
+              const redirectUrl = result.data.user.role === 'Admin' ? '/admin1' : '/mentor/dashboard'
               navigate(redirectUrl)
               return
             }
           }
           
           // Default redirect based on user role
-          const redirectUrl = result.data.redirectUrl || '/dashboard'
+          const defaultRedirect = result.data.user.role === 'Admin' ? '/admin1'
+            : result.data.user.role === 'Mentor' ? '/mentor/dashboard'
+            : '/dashboard'
+          const redirectUrl = result.data.redirectUrl || defaultRedirect
           navigate(redirectUrl)
         } else {
           throw new Error(result.message || 'Authentication failed')

@@ -23,7 +23,11 @@ const Navbar = () => {
     if (!user) return '/login';
     switch (user.role) {
       case 'Admin':
+<<<<<<< HEAD
         return '/admin';
+=======
+        return '/admin1';
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
       case 'Mentor':
         return '/mentor/dashboard';
       default:
@@ -164,6 +168,40 @@ const Navbar = () => {
           </div>
         </div>
 
+        {/* Desktop Navigation Links */}
+        <div className="hidden md:flex items-center space-x-6 flex-1 justify-center">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => handleNavClick(item)}
+              className="text-gray-300 hover:text-cosmic-purple transition-colors duration-200 relative group"
+            >
+              {item.name}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cosmic-purple to-nebula-pink group-hover:w-full transition-all duration-300"></span>
+            </button>
+          ))}
+        </div>
+
+        {/* Desktop User Section */}
+        <div className="hidden md:flex items-center space-x-4">
+          {user && (
+            <>
+              <button
+                onClick={handleDashboardClick}
+                className="retro-button border-2 border-cosmic-purple text-white hover:bg-cosmic-purple/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-cosmic-purple/40 hover:-translate-y-0.5 cosmic-glow"
+              >
+                DASHBOARD
+              </button>
+              <button
+                onClick={handleLogout}
+                className="retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-5 py-2 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-nebula-pink/40 hover:-translate-y-0.5 cosmic-glow"
+              >
+                LOGOUT
+              </button>
+            </>
+          )}
+        </div>
+
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -180,6 +218,7 @@ const Navbar = () => {
             </svg>
           )}
         </button>
+<<<<<<< HEAD
 
         {/* Desktop Navigation Links */}
         <div className="hidden md:flex items-center space-x-6">
@@ -213,9 +252,10 @@ const Navbar = () => {
             </button>
           )}
         </div>
+=======
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
       </div>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <>
           {/* Overlay to prevent body scroll */}
@@ -239,8 +279,22 @@ const Navbar = () => {
                 </button>
               ))}
 
+<<<<<<< HEAD
               {user ? (
                 <div className="pt-3 border-t border-white/10">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
+=======
+              {user && (
+                <div className="pt-3 border-t border-white/10 space-y-3">
+                  <button
+                    onClick={handleDashboardClick}
+                    className="w-full retro-button border-2 border-cosmic-purple text-white hover:bg-cosmic-purple/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
+                  >
+                    LOGOUT
+                  </button>
                   <button
                     onClick={handleLogout}
                     className="w-full retro-button border-2 border-nebula-pink text-white hover:bg-nebula-pink/15 px-6 py-2.5 rounded-full font-semibold cosmic-glow"
@@ -248,6 +302,7 @@ const Navbar = () => {
                     LOGOUT
                   </button>
                 </div>
+<<<<<<< HEAD
               ) : (
                 <button
                   onClick={handleDashboardClick}
@@ -255,6 +310,8 @@ const Navbar = () => {
                 >
                   DASHBOARD
                 </button>
+=======
+>>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
               )}
             </div>
           </div>

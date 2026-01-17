@@ -1,7 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const normalizeApiBaseUrl = (raw) => {
-  if (!raw) return 'http://localhost:5000/api/v1';
+  if (!raw) {
+    // For production deployed on Vercel/Railway
+    if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      return 'https://dscwoc-production.up.railway.app/api/v1';
+    }
+    // Local development
+    return 'http://localhost:5000/api/v1';
+  }
   const base = String(raw).replace(/\/+$/, '');
   if (base.endsWith('/api/v1')) return base;
   if (base.endsWith('/api')) return `${base}/v1`;
@@ -49,7 +56,6 @@ export const useLeaderboard = (page = 1, limit = 10, filter = 'overall') => {
 export const useProjects = (filters = {}) => {
   const { page = 1, limit = 12, difficulty, tags, tech, search, sortBy, order } = filters;
   
-
   return useQuery({
     queryKey: ['projects', filters],
     queryFn: async () => {
@@ -145,7 +151,6 @@ export const useMyProjects = () => {
  */
 export const useCreateProject = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (projectData) => {
       const response = await fetch(`${API_BASE_URL}/projects`, {
@@ -156,7 +161,6 @@ export const useCreateProject = () => {
         },
         body: JSON.stringify(projectData),
       });
-
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to create project');
       return result;
@@ -172,7 +176,6 @@ export const useCreateProject = () => {
  */
 export const useUpdateProject = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async ({ projectId, data }) => {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
@@ -183,7 +186,6 @@ export const useUpdateProject = () => {
         },
         body: JSON.stringify(data),
       });
-
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to update project');
       return result;
@@ -200,14 +202,12 @@ export const useUpdateProject = () => {
  */
 export const useSyncProject = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (projectId) => {
       const response = await fetch(`${API_BASE_URL}/projects/${projectId}/sync`, {
         method: 'POST',
         headers: getAuthHeaders(),
       });
-
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || 'Failed to sync project');
       return result;
@@ -290,6 +290,31 @@ export const useUserDashboardData = (options = {}) => {
       return response.json();
     },
     enabled,
+    staleTime: 15 * 60 * 1000, // User dashboard data changes infrequently
+    gcTime: 20 * 60 * 1000,
+  });
+};
+
+/**
+ * Fetch User Joined Project Data
+ */
+export const useUserJoinedProjects = (userid, options = {}) => {
+  const { enabled = true } = options;
+
+  return useQuery({
+    queryKey: ['userJoinedProjects', userid],
+    queryFn: async () => {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_BASE_URL}/pull-requests/joinedprojects/${userid}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (response.status === 401) throw new Error('Unauthorized');
+      if (!response.ok) throw new Error('Failed to fetch user joined projects');
+      return response.json();
+    },
+    enabled: enabled && !!userid,
     staleTime: 15 * 60 * 1000, // User dashboard data changes infrequently
     gcTime: 20 * 60 * 1000,
   });
