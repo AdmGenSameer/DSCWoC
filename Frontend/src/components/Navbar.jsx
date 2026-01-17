@@ -303,6 +303,9 @@ const Navbar = () => {
                   </button>
                 </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 82a31d45401af63b50ecb924e367fd98151b1215
               ) : (
                 <button
                   onClick={handleDashboardClick}
@@ -310,8 +313,11 @@ const Navbar = () => {
                 >
                   DASHBOARD
                 </button>
+<<<<<<< HEAD
 =======
 >>>>>>> a1a3d7550d12370d81dfddf7aedfa8a92bc5753f
+=======
+>>>>>>> 82a31d45401af63b50ecb924e367fd98151b1215
               )}
             </div>
           </div>
